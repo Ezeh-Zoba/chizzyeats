@@ -27,7 +27,7 @@ export function AdminSidebar({ activeSection, onSectionChange, collapsed, onTogg
   return (
     <aside
       className="flex flex-col"
-      style={{ width: collapsed ? "64px" : "220px", backgroundColor: "#5C4033", transition: "width 0.25s ease", flexShrink: 0 }}
+      style={{ width: collapsed ? "64px" : "220px", backgroundColor: "var(--ce-bg-admin-sidebar)", transition: "width 0.25s ease", flexShrink: 0 }}
     >
       <div className="flex items-center justify-between px-4 py-5 border-b" style={{ borderColor: "rgba(255,199,44,0.15)" }}>
         {!collapsed && <Logo variant="white" size="sm" />}

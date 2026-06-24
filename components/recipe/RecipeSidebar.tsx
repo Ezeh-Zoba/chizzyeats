@@ -1,10 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 import { Download, Printer, Share2, Instagram, Facebook, Twitter, Copy, Star } from "lucide-react";
 import type { Recipe } from "@/components/RecipeCard";
+import { db } from "@/lib/firebase/client";
+import { useAuthUser } from "@/hooks/useAuthUser";
+import { SignInModal } from "@/components/auth/SignInModal";
 import { RatingDialog } from "@/components/recipe/RatingDialog";
 
 interface RecipeSidebarProps {
@@ -12,9 +16,20 @@ interface RecipeSidebarProps {
 }
 
 export function RecipeSidebar({ recipe }: RecipeSidebarProps) {
+  const { user } = useAuthUser();
   const [copied, setCopied] = useState(false);
   const [rateOpen, setRateOpen] = useState(false);
+  const [signInOpen, setSignInOpen] = useState(false);
   const [userRating, setUserRating] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (!user) { setUserRating(null); return; }
+    let active = true;
+    getDoc(doc(db, "ratings", `${user.uid}_${recipe.id}`)).then((snap) => {
+      if (active && snap.exists()) setUserRating(snap.data().value as number);
+    });
+    return () => { active = false; };
+  }, [user, recipe.id]);
 
   const shareUrl = typeof window !== "undefined" ? window.location.href : "";
 
@@ -24,9 +39,7 @@ export function RecipeSidebar({ recipe }: RecipeSidebarProps) {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const openShareWindow = (url: string) => {
-    window.open(url, "_blank", "noopener,noreferrer,width=600,height=500");
-  };
+  const openShareWindow = (url: string) => window.open(url, "_blank", "noopener,noreferrer,width=600,height=500");
 
   const shareButtons = [
     {
@@ -76,19 +89,19 @@ export function RecipeSidebar({ recipe }: RecipeSidebarProps) {
           onClick={() => window.print()}
           className="w-full flex items-center justify-center gap-2 py-3 px-5 rounded-2xl text-sm"
           style={{
-            backgroundColor: "#fff",
-            color: "#5C4033",
+            backgroundColor: "var(--ce-bg-card)",
+            color: "var(--ce-text)",
             fontWeight: 600,
-            boxShadow: "0 2px 12px rgba(92,64,51,0.08)",
-            border: "1.5px solid rgba(92,64,51,0.1)",
+            boxShadow: "0 2px 12px var(--ce-shadow)",
+            border: "1.5px solid var(--ce-border)",
           }}
         >
           <Printer size={16} />
           Print Recipe
         </button>
 
-        <div className="p-4 rounded-2xl" style={{ backgroundColor: "#fff", boxShadow: "0 2px 12px rgba(92,64,51,0.08)" }}>
-          <h4 className="text-sm mb-3" style={{ color: "#5C4033", fontWeight: 700 }}>
+        <div className="p-4 rounded-2xl" style={{ backgroundColor: "var(--ce-bg-card)", boxShadow: "0 2px 12px var(--ce-shadow)" }}>
+          <h4 className="text-sm mb-3" style={{ color: "var(--ce-text)", fontWeight: 700 }}>
             <Share2 size={14} className="inline mr-1.5" />
             Share this Recipe
           </h4>
@@ -109,8 +122,8 @@ export function RecipeSidebar({ recipe }: RecipeSidebarProps) {
           </div>
         </div>
 
-        <div className="p-4 rounded-2xl text-center" style={{ backgroundColor: "#FFF8E7", border: "1.5px solid rgba(255,199,44,0.3)" }}>
-          <div style={{ fontFamily: "'Playfair Display', serif", fontSize: "36px", color: "#5C4033", fontWeight: 800 }}>
+        <div className="p-4 rounded-2xl text-center" style={{ backgroundColor: "var(--ce-bg)", border: "1.5px solid var(--ce-overlay-gold-border)" }}>
+          <div style={{ fontFamily: "'Dancing Script', cursive", fontSize: "36px", color: "var(--ce-text)", fontWeight: 800 }}>
             {userRating ?? recipe.rating}
           </div>
           <div className="flex justify-center gap-0.5 mb-1">
@@ -118,11 +131,11 @@ export function RecipeSidebar({ recipe }: RecipeSidebarProps) {
               <Star key={s} size={14} fill={s <= Math.round(userRating ?? recipe.rating ?? 5) ? "#FFC72C" : "none"} style={{ color: "#FFC72C" }} />
             ))}
           </div>
-          <p className="text-xs" style={{ color: "#8B6F47" }}>
+          <p className="text-xs" style={{ color: "var(--ce-text-muted)" }}>
             {userRating ? "Thanks for your rating!" : `${recipe.saves?.toLocaleString()} people saved this`}
           </p>
           <button
-            onClick={() => setRateOpen(true)}
+            onClick={() => (user ? setRateOpen(true) : setSignInOpen(true))}
             className="mt-3 w-full py-2 rounded-xl text-xs"
             style={{ backgroundColor: "#FFC72C", color: "#5C4033", fontWeight: 700 }}
           >
@@ -130,7 +143,7 @@ export function RecipeSidebar({ recipe }: RecipeSidebarProps) {
           </button>
         </div>
 
-        <div className="p-4 rounded-2xl" style={{ backgroundColor: "#fff", boxShadow: "0 2px 12px rgba(92,64,51,0.08)" }}>
+        <div className="p-4 rounded-2xl" style={{ backgroundColor: "var(--ce-bg-card)", boxShadow: "0 2px 12px var(--ce-shadow)" }}>
           <div className="relative w-14 h-14 rounded-full overflow-hidden mx-auto mb-3">
             <Image
               src="https://images.unsplash.com/photo-1636647511729-6703539ba71f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=200"
@@ -140,16 +153,16 @@ export function RecipeSidebar({ recipe }: RecipeSidebarProps) {
               className="object-cover"
             />
           </div>
-          <h4 className="text-sm text-center mb-1" style={{ color: "#5C4033", fontFamily: "'Playfair Display', serif", fontWeight: 700 }}>
+          <h4 className="text-sm text-center mb-1" style={{ color: "var(--ce-text)", fontFamily: "'Dancing Script', cursive", fontWeight: 700 }}>
             Chizzy
           </h4>
-          <p className="text-xs text-center mb-3" style={{ color: "#8B6F47" }}>
+          <p className="text-xs text-center mb-3" style={{ color: "var(--ce-text-muted)" }}>
             Nigerian food lover, recipe developer, and your guide to flavourful cooking.
           </p>
           <Link
             href="/about"
             className="block text-center text-xs py-2 rounded-xl"
-            style={{ backgroundColor: "#FFF8E7", color: "#FF8C42", fontWeight: 600 }}
+            style={{ backgroundColor: "var(--ce-bg-surface)", color: "#FF8C42", fontWeight: 600 }}
           >
             View Profile
           </Link>
@@ -160,11 +173,20 @@ export function RecipeSidebar({ recipe }: RecipeSidebarProps) {
         open={rateOpen}
         onOpenChange={setRateOpen}
         recipeTitle={recipe.title}
-        onSubmit={(rating) => {
+        onSubmit={async (rating) => {
+          if (!user) return;
+          await setDoc(doc(db, "ratings", `${user.uid}_${recipe.id}`), {
+            userId: user.uid,
+            recipeId: recipe.id,
+            value: rating,
+            createdAt: new Date(),
+          });
           setUserRating(rating);
           setTimeout(() => setRateOpen(false), 1200);
         }}
       />
+
+      <SignInModal open={signInOpen} onOpenChange={setSignInOpen} />
     </div>
   );
 }

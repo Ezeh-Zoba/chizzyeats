@@ -2,9 +2,12 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { Heart, Mail, Check } from "lucide-react";
 import { FaInstagram, FaFacebook, FaTiktok } from "react-icons/fa6";
 import { Logo } from "./Logo";
+import { db } from "@/lib/firebase/client";
+import { useSiteConfig } from "@/hooks/useSiteConfig";
 
 const footerLinks = {
   recipes: [
@@ -19,6 +22,7 @@ const footerLinks = {
     { label: "Budget Meals", href: "/category/budget" },
     { label: "Quick Meals", href: "/category/quick" },
     { label: "Latest Posts", href: "/category/nigerian" },
+    { label: "Blog", href: "/blog" },
     { label: "About Chizzy", href: "/about" },
     { label: "Contact", href: "/contact" },
   ],
@@ -30,23 +34,35 @@ const legalLinks = [
   { label: "Cookies", href: "/cookies" },
 ];
 
-const socials = [
-  { icon: FaInstagram, label: "Instagram", href: "#" },
-  { icon: FaFacebook, label: "Facebook", href: "#" },
-  { icon: FaTiktok, label: "TikTok", href: "#" },
-];
-
 export function Footer() {
+  const siteConfig = useSiteConfig();
   const [email, setEmail] = useState("");
   const [subscribed, setSubscribed] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSubscribe = (e: React.FormEvent) => {
+  const socials = [
+    { icon: FaInstagram, label: "Instagram", href: siteConfig.instagramUrl },
+    { icon: FaFacebook, label: "Facebook", href: siteConfig.facebookUrl },
+    { icon: FaTiktok, label: "TikTok", href: siteConfig.tiktokUrl },
+  ].filter((s) => s.href);
+
+  const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (email) setSubscribed(true);
+    setError(null);
+    try {
+      await addDoc(collection(db, "newsletter_subscribers"), {
+        email,
+        createdAt: serverTimestamp(),
+        source: "footer",
+      });
+      setSubscribed(true);
+    } catch {
+      setError("Couldn't subscribe right now. Please try again.");
+    }
   };
 
   return (
-    <footer style={{ backgroundColor: "#5C4033", fontFamily: "'Inter', sans-serif" }}>
+    <footer className="print:hidden" style={{ backgroundColor: "#5C4033", fontFamily: "'Inter', sans-serif" }}>
       {/* Top section */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-10">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-10 lg:gap-16">
@@ -61,6 +77,8 @@ export function Footer() {
                 <a
                   key={label}
                   href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   aria-label={label}
                   className="w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200"
                   style={{ backgroundColor: "rgba(255,199,44,0.15)" }}
@@ -137,6 +155,7 @@ export function Footer() {
               </div>
             ) : (
               <form onSubmit={handleSubscribe} className="flex gap-2">
+                {error && <p className="text-xs w-full" style={{ color: "#FF8C42" }}>{error}</p>}
                 <div className="flex-1 flex items-center gap-2 px-3 py-2.5 rounded-xl" style={{ backgroundColor: "rgba(255,255,255,0.1)" }}>
                   <Mail size={14} style={{ color: "rgba(255,248,231,0.5)" }} />
                   <input
@@ -174,7 +193,7 @@ export function Footer() {
       >
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
           <p className="text-xs" style={{ color: "rgba(255,248,231,0.5)" }}>
-            © 2024 Chizzy's Eats. All rights reserved.
+            © 2024 Chizzy Eats. All rights reserved.
           </p>
           <p className="text-xs flex items-center gap-1" style={{ color: "rgba(255,248,231,0.5)" }}>
             Made with <Heart size={10} fill="currentColor" style={{ color: "#FF8C42" }} /> in Lagos & beyond

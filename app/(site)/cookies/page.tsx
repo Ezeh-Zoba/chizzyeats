@@ -4,7 +4,7 @@ export default function CookiesPage() {
   return (
     <LegalPageLayout
       title="Cookie Policy"
-      intro="Last updated June 2026. Here's what cookies do on Chizzy's Eats."
+      intro="Last updated June 2026. Here's what cookies do on Chizzy Eats."
       sections={[
         {
           heading: "Essential Cookies",

@@ -29,7 +29,7 @@ export function CategoryBanner({ meta }: CategoryBannerProps) {
             <div>
               <h1
                 style={{
-                  fontFamily: "'Playfair Display', serif",
+                  fontFamily: "'Dancing Script', cursive",
                   fontSize: "clamp(28px, 5vw, 48px)",
                   color: "#FFF8E7",
                   fontWeight: 800,

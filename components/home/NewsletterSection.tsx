@@ -1,11 +1,21 @@
 "use client";
 
-import { useState } from "react";
-import { Mail, Star } from "lucide-react";
+import { useState, useEffect } from "react";
+import { addDoc, collection, doc, getDoc, serverTimestamp } from "firebase/firestore";
+import { Mail, Star, PartyPopper } from "lucide-react";
+import { db } from "@/lib/firebase/client";
 
 export function NewsletterSection() {
   const [email, setEmail] = useState("");
   const [subscribed, setSubscribed] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [subscriberCount, setSubscriberCount] = useState<number>(0);
+
+  useEffect(() => {
+    getDoc(doc(db, "siteConfig", "main")).then((snap) => {
+      if (snap.exists()) setSubscriberCount((snap.data().subscriberCount as number) || 0);
+    });
+  }, []);
 
   return (
     <section
@@ -21,24 +31,34 @@ export function NewsletterSection() {
         </div>
         <h2
           className="mb-3"
-          style={{ fontFamily: "'Playfair Display', serif", fontSize: "clamp(28px, 4vw, 42px)", color: "#5C4033", fontWeight: 800 }}
+          style={{ fontFamily: "'Dancing Script', cursive", fontSize: "clamp(28px, 4vw, 42px)", color: "#5C4033", fontWeight: 800 }}
         >
           Get Weekly Recipes in Your Inbox
         </h2>
         <p className="mb-8 leading-relaxed" style={{ color: "rgba(92,64,51,0.75)" }}>
-          Join 25,000+ food lovers who get exclusive recipes, kitchen tips, and food stories every Tuesday morning.
+          Join {subscriberCount > 0 ? `${subscriberCount.toLocaleString()}+` : "thousands of"} food lovers who get exclusive recipes, kitchen tips, and food stories every Tuesday morning.
         </p>
 
         {subscribed ? (
           <div className="flex items-center justify-center gap-3 py-4 px-8 rounded-full" style={{ backgroundColor: "rgba(92,64,51,0.15)" }}>
             <Star size={20} fill="#5C4033" style={{ color: "#5C4033" }} />
-            <span style={{ color: "#5C4033", fontWeight: 700 }}>You're in! Check your inbox for a welcome gift 🎉</span>
+            <span style={{ color: "#5C4033", fontWeight: 700 }}>You're in! Check your inbox for a welcome gift <PartyPopper size={16} style={{ display: "inline", verticalAlign: "middle" }} /></span>
           </div>
         ) : (
           <form
-            onSubmit={(e) => {
+            onSubmit={async (e) => {
               e.preventDefault();
-              if (email) setSubscribed(true);
+              setError(null);
+              try {
+                await addDoc(collection(db, "newsletter_subscribers"), {
+                  email,
+                  createdAt: serverTimestamp(),
+                  source: "home",
+                });
+                setSubscribed(true);
+              } catch {
+                setError("Couldn't subscribe right now. Please try again.");
+              }
             }}
             className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto"
           >
@@ -69,6 +89,11 @@ export function NewsletterSection() {
               Subscribe Free
             </button>
           </form>
+        )}
+        {error && (
+          <p className="mt-3 text-sm" style={{ color: "#5C4033", fontWeight: 600 }}>
+            {error}
+          </p>
         )}
         <p className="mt-4 text-xs" style={{ color: "rgba(92,64,51,0.6)" }}>
           No spam. Unsubscribe anytime. No ads.

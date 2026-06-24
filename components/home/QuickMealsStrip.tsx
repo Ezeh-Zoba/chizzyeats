@@ -23,7 +23,7 @@ export function QuickMealsStrip({ recipes }: QuickMealsStripProps) {
             </div>
             <h3
               style={{
-                fontFamily: "'Playfair Display', serif",
+                fontFamily: "'Dancing Script', cursive",
                 fontSize: "26px",
                 color: "#FFF8E7",
                 fontWeight: 700,
@@ -56,7 +56,7 @@ export function QuickMealsStrip({ recipes }: QuickMealsStripProps) {
                 </div>
                 <div>
                   <div className="text-xs mb-1" style={{ color: "#FFC72C", fontWeight: 600 }}>{r.time}</div>
-                  <div className="text-sm leading-snug" style={{ color: "#FFF8E7", fontFamily: "'Playfair Display', serif", fontWeight: 600 }}>
+                  <div className="text-sm leading-snug" style={{ color: "#FFF8E7", fontFamily: "'Dancing Script', cursive", fontWeight: 600 }}>
                     {r.title}
                   </div>
                 </div>

@@ -21,6 +21,7 @@ export interface Recipe {
   id: string;
   title: string;
   category: string;
+  categorySlug?: string;
   time: string;
   difficulty: string;
   image: string;
@@ -32,6 +33,12 @@ export interface Recipe {
   ingredients?: RecipeIngredient[];
   steps?: RecipeStep[];
   notes?: string[];
+  galleryImages?: string[];
+  videoUrl?: string;
+  status?: "draft" | "published";
+  prepTime?: string;
+  cookTime?: string;
+  authorId?: string;
 }
 
 interface RecipeCardProps {
@@ -45,11 +52,7 @@ export function RecipeCard({ recipe, variant = "default" }: RecipeCardProps) {
 
   if (variant === "horizontal") {
     return (
-      <Link
-        href={`/recipe/${recipe.id}`}
-        className="flex gap-4 group"
-        style={{ fontFamily: "'Inter', sans-serif" }}
-      >
+      <Link href={`/recipe/${recipe.id}`} className="flex gap-4 group" style={{ fontFamily: "'Inter', sans-serif" }}>
         <div className="relative w-24 h-24 rounded-2xl overflow-hidden flex-shrink-0">
           <Image
             src={recipe.image}
@@ -62,16 +65,19 @@ export function RecipeCard({ recipe, variant = "default" }: RecipeCardProps) {
         <div className="flex-1 min-w-0 py-1">
           <span
             className="text-xs px-2 py-0.5 rounded-full"
-            style={{ backgroundColor: "#FFF8E7", color: "#FF8C42", fontWeight: 600 }}
+            style={{ backgroundColor: "var(--ce-bg-surface)", color: "#FF8C42", fontWeight: 600 }}
           >
             {recipe.category}
           </span>
-          <h4 className="mt-1.5 text-sm leading-snug line-clamp-2" style={{ color: "#5C4033", fontFamily: "'Playfair Display', serif", fontWeight: 600 }}>
+          <h4
+            className="mt-1.5 text-sm leading-snug line-clamp-2"
+            style={{ color: "var(--ce-text)", fontFamily: "'Dancing Script', cursive", fontWeight: 600 }}
+          >
             {recipe.title}
           </h4>
           <div className="flex items-center gap-2 mt-1">
-            <Clock size={11} style={{ color: "#8B6F47" }} />
-            <span className="text-xs" style={{ color: "#8B6F47" }}>{recipe.time}</span>
+            <Clock size={11} style={{ color: "var(--ce-text-muted)" }} />
+            <span className="text-xs" style={{ color: "var(--ce-text-muted)" }}>{recipe.time}</span>
           </div>
         </div>
       </Link>
@@ -83,7 +89,7 @@ export function RecipeCard({ recipe, variant = "default" }: RecipeCardProps) {
       <Link
         href={`/recipe/${recipe.id}`}
         className="group relative overflow-hidden rounded-3xl block"
-        style={{ boxShadow: "0 8px 40px rgba(92,64,51,0.15)" }}
+        style={{ boxShadow: "0 8px 40px var(--ce-shadow-elevated)" }}
       >
         <div className="relative aspect-[4/3] overflow-hidden">
           <Image
@@ -106,7 +112,7 @@ export function RecipeCard({ recipe, variant = "default" }: RecipeCardProps) {
           </span>
           <h3
             className="mb-2 leading-tight"
-            style={{ color: "#FFF8E7", fontFamily: "'Playfair Display', serif", fontSize: "22px", fontWeight: 700 }}
+            style={{ color: "#FFF8E7", fontFamily: "'Dancing Script', cursive", fontSize: "22px", fontWeight: 700 }}
           >
             {recipe.title}
           </h3>
@@ -154,12 +160,12 @@ export function RecipeCard({ recipe, variant = "default" }: RecipeCardProps) {
       href={`/recipe/${recipe.id}`}
       className="group block rounded-2xl overflow-hidden transition-all duration-300"
       style={{
-        backgroundColor: "#fff",
-        boxShadow: "0 2px 16px rgba(92,64,51,0.08)",
+        backgroundColor: "var(--ce-bg-card)",
+        boxShadow: "0 2px 16px var(--ce-shadow)",
         fontFamily: "'Inter', sans-serif",
       }}
-      onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.boxShadow = "0 8px 32px rgba(92,64,51,0.16)")}
-      onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.boxShadow = "0 2px 16px rgba(92,64,51,0.08)")}
+      onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.boxShadow = "0 8px 32px var(--ce-shadow-elevated)")}
+      onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.boxShadow = "0 2px 16px var(--ce-shadow)")}
     >
       <div className="relative overflow-hidden aspect-[4/3]">
         <Image
@@ -170,10 +176,7 @@ export function RecipeCard({ recipe, variant = "default" }: RecipeCardProps) {
           className="object-cover transition-transform duration-500 group-hover:scale-110"
         />
         <div className="absolute top-3 left-3">
-          <span
-            className="text-xs px-3 py-1 rounded-full"
-            style={{ backgroundColor: "#FFC72C", color: "#5C4033", fontWeight: 700 }}
-          >
+          <span className="text-xs px-3 py-1 rounded-full" style={{ backgroundColor: "#FFC72C", color: "#5C4033", fontWeight: 700 }}>
             {recipe.category}
           </span>
         </div>
@@ -183,14 +186,14 @@ export function RecipeCard({ recipe, variant = "default" }: RecipeCardProps) {
             className="w-8 h-8 rounded-full flex items-center justify-center transition-colors"
             style={{ backgroundColor: "rgba(255,255,255,0.9)" }}
           >
-            <Heart size={14} fill={liked ? "#FF8C42" : "none"} style={{ color: liked ? "#FF8C42" : "#5C4033" }} />
+            <Heart size={14} fill={liked ? "#FF8C42" : "none"} style={{ color: liked ? "#FF8C42" : "var(--ce-text)" }} />
           </button>
           <button
             onClick={(e) => { e.preventDefault(); setSaved(!saved); }}
             className="w-8 h-8 rounded-full flex items-center justify-center transition-colors"
             style={{ backgroundColor: "rgba(255,255,255,0.9)" }}
           >
-            <Bookmark size={14} fill={saved ? "#FFC72C" : "none"} style={{ color: saved ? "#FFC72C" : "#5C4033" }} />
+            <Bookmark size={14} fill={saved ? "#FFC72C" : "none"} style={{ color: saved ? "#FFC72C" : "var(--ce-text)" }} />
           </button>
         </div>
       </div>
@@ -199,34 +202,31 @@ export function RecipeCard({ recipe, variant = "default" }: RecipeCardProps) {
         <div className="flex items-center gap-2 mb-2">
           <span
             className="text-xs px-2 py-0.5 rounded-full"
-            style={{ backgroundColor: "#FFF8E7", color: "#FF8C42", fontWeight: 600 }}
+            style={{ backgroundColor: "var(--ce-bg-surface)", color: "#FF8C42", fontWeight: 600 }}
           >
             {recipe.difficulty}
           </span>
           <div className="flex items-center gap-1 ml-auto">
-            <Clock size={12} style={{ color: "#8B6F47" }} />
-            <span className="text-xs" style={{ color: "#8B6F47" }}>{recipe.time}</span>
+            <Clock size={12} style={{ color: "var(--ce-text-muted)" }} />
+            <span className="text-xs" style={{ color: "var(--ce-text-muted)" }}>{recipe.time}</span>
           </div>
         </div>
 
         <h3
           className="mb-2 leading-snug line-clamp-2"
-          style={{ color: "#5C4033", fontFamily: "'Playfair Display', serif", fontSize: "16px", fontWeight: 600 }}
+          style={{ color: "var(--ce-text)", fontFamily: "'Dancing Script', cursive", fontSize: "16px", fontWeight: 600 }}
         >
           {recipe.title}
         </h3>
 
         {recipe.excerpt && (
-          <p className="text-xs leading-relaxed line-clamp-2 mb-3" style={{ color: "#8B6F47" }}>
+          <p className="text-xs leading-relaxed line-clamp-2 mb-3" style={{ color: "var(--ce-text-muted)" }}>
             {recipe.excerpt}
           </p>
         )}
 
-        <div
-          className="pt-3 border-t flex items-center justify-between"
-          style={{ borderColor: "rgba(92,64,51,0.08)" }}
-        >
-          <span className="text-xs" style={{ color: "#8B6F47" }}>
+        <div className="pt-3 border-t flex items-center justify-between" style={{ borderColor: "var(--ce-border)" }}>
+          <span className="text-xs" style={{ color: "var(--ce-text-muted)" }}>
             By {recipe.author || "Chizzy"}
           </span>
           <span className="text-xs" style={{ color: "#FF8C42", fontWeight: 600 }}>

@@ -4,11 +4,11 @@ export default function TermsPage() {
   return (
     <LegalPageLayout
       title="Terms of Use"
-      intro="Last updated June 2026. By using Chizzy's Eats, you agree to the following."
+      intro="Last updated June 2026. By using Chizzy Eats, you agree to the following."
       sections={[
         {
           heading: "Using the Site",
-          body: "Chizzy's Eats is provided for personal, non-commercial use. You're welcome to cook every recipe, share links to the site, and quote short excerpts with credit.",
+          body: "Chizzy Eats is provided for personal, non-commercial use. You're welcome to cook every recipe, share links to the site, and quote short excerpts with credit.",
         },
         {
           heading: "Recipe Content",

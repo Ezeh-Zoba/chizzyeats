@@ -8,15 +8,17 @@ interface FeaturedRecipesSectionProps {
 }
 
 export function FeaturedRecipesSection({ recipes }: FeaturedRecipesSectionProps) {
+  if (recipes.length === 0) return null;
+
   return (
-    <section className="py-16 lg:py-24" style={{ backgroundColor: "#FFF8E7" }}>
+    <section className="py-16 lg:py-24" style={{ backgroundColor: "var(--ce-bg)" }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-end justify-between mb-10">
           <div>
             <p className="text-xs mb-2 uppercase tracking-widest" style={{ color: "#FF8C42", fontWeight: 600 }}>
               Editor's Picks
             </p>
-            <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: "clamp(28px, 4vw, 40px)", color: "#5C4033", fontWeight: 700 }}>
+            <h2 style={{ fontFamily: "'Dancing Script', cursive", fontSize: "clamp(28px, 4vw, 40px)", color: "var(--ce-text)", fontWeight: 700 }}>
               Featured Recipes
             </h2>
           </div>

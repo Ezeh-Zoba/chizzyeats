@@ -5,22 +5,22 @@ export default function NotFound() {
   return (
     <div
       className="min-h-screen flex items-center justify-center"
-      style={{ backgroundColor: "#FFF8E7", fontFamily: "'Inter', sans-serif" }}
+      style={{ backgroundColor: "var(--ce-bg)", fontFamily: "'Inter', sans-serif" }}
     >
       <div className="max-w-md mx-auto px-6 py-20 text-center">
         <GiCookingPot size={56} className="mb-6 mx-auto" style={{ color: "#FF8C42" }} />
         <h1
           style={{
-            fontFamily: "'Playfair Display', serif",
+            fontFamily: "'Dancing Script', cursive",
             fontSize: "clamp(28px, 5vw, 40px)",
-            color: "#5C4033",
+            color: "var(--ce-text)",
             fontWeight: 800,
             marginBottom: "12px",
           }}
         >
           Page Not Found
         </h1>
-        <p className="text-base leading-relaxed mb-8" style={{ color: "#8B6F47" }}>
+        <p className="text-base leading-relaxed mb-8" style={{ color: "var(--ce-text-muted)" }}>
           We couldn't find that page. Maybe it was moved, or the recipe got eaten before we could save it.
         </p>
         <Link

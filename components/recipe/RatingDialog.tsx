@@ -42,7 +42,7 @@ export function RatingDialog({ open, onOpenChange, recipeTitle, onSubmit }: Rati
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent style={{ fontFamily: "'Inter', sans-serif" }}>
         <DialogHeader>
-          <DialogTitle style={{ fontFamily: "'Playfair Display', serif", color: "#5C4033" }}>
+          <DialogTitle style={{ fontFamily: "'Dancing Script', cursive", color: "var(--ce-text)" }}>
             Rate this Recipe
           </DialogTitle>
           <DialogDescription>

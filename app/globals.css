@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,600;1,700&family=Inter:wght@300;400;500;600;700&family=Dancing+Script:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Dancing+Script:wght@400;500;600;700&display=swap');
 
 @import 'tailwindcss';
 @import 'tw-animate-css';
@@ -123,7 +123,7 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
 
-  /* Chizzy's Eats brand tokens — additive only, see migration plan Section 7.
+  /* Chizzy Eats brand tokens — additive only, see migration plan Section 7.
      New components should prefer bg-brand-gold / text-brand-brown etc. over
      hardcoded hex; existing inline-styled components are left as-is. */
   --color-brand-gold: #ffc72c;
@@ -133,6 +133,52 @@
   --color-brand-tan: #8b6f47;
 }
 
+/* ─── ChizzyEats semantic dark-mode tokens ─────────────────────────────────
+   Used by all custom components via var(--ce-*).
+   Brand gold #FFC72C and orange #FF8C42 are unchanged in both modes.
+   ─────────────────────────────────────────────────────────────────────────── */
+:root {
+  --ce-bg:                  #FFF8E7;
+  --ce-bg-card:             #ffffff;
+  --ce-bg-surface:          #FFF3D8;
+  --ce-bg-admin:            #F5F3EF;
+  --ce-bg-admin-sidebar:    #5C4033;
+  --ce-bg-nav-scrolled:     rgba(255, 255, 255, 0.97);
+  --ce-bg-nav-mobile:       rgba(255, 255, 255, 0.98);
+  --ce-text:                #5C4033;
+  --ce-text-muted:          #8B6F47;
+  --ce-text-faint:          rgba(92, 64, 51, 0.5);
+  --ce-border:              rgba(92, 64, 51, 0.12);
+  --ce-border-strong:       rgba(92, 64, 51, 0.25);
+  --ce-shadow:              rgba(92, 64, 51, 0.08);
+  --ce-shadow-elevated:     rgba(92, 64, 51, 0.14);
+  --ce-overlay-gold:        rgba(255, 199, 44, 0.15);
+  --ce-overlay-gold-border: rgba(255, 199, 44, 0.35);
+  --ce-overlay-white:       rgba(255, 255, 255, 0.15);
+  --ce-overlay-brown:       rgba(92, 64, 51, 0.88);
+}
+
+.dark {
+  --ce-bg:                  #1A0E08;
+  --ce-bg-card:             #2C1810;
+  --ce-bg-surface:          #231209;
+  --ce-bg-admin:            #180C06;
+  --ce-bg-admin-sidebar:    #3D2A1F;
+  --ce-bg-nav-scrolled:     rgba(26, 14, 8, 0.97);
+  --ce-bg-nav-mobile:       rgba(26, 14, 8, 0.98);
+  --ce-text:                #FFF8E7;
+  --ce-text-muted:          rgba(255, 248, 231, 0.65);
+  --ce-text-faint:          rgba(255, 248, 231, 0.38);
+  --ce-border:              rgba(255, 248, 231, 0.1);
+  --ce-border-strong:       rgba(255, 248, 231, 0.2);
+  --ce-shadow:              rgba(0, 0, 0, 0.35);
+  --ce-shadow-elevated:     rgba(0, 0, 0, 0.5);
+  --ce-overlay-gold:        rgba(255, 199, 44, 0.12);
+  --ce-overlay-gold-border: rgba(255, 199, 44, 0.25);
+  --ce-overlay-white:       rgba(255, 255, 255, 0.08);
+  --ce-overlay-brown:       rgba(10, 5, 2, 0.88);
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -140,6 +186,7 @@
 
   body {
     @apply bg-background text-foreground;
+    transition: background-color 0.2s ease, color 0.2s ease;
   }
 
   /**

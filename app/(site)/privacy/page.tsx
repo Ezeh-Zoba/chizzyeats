@@ -4,7 +4,7 @@ export default function PrivacyPage() {
   return (
     <LegalPageLayout
       title="Privacy Policy"
-      intro="Last updated June 2026. Here's how Chizzy's Eats handles your information."
+      intro="Last updated June 2026. Here's how Chizzy Eats handles your information."
       sections={[
         {
           heading: "What We Collect",

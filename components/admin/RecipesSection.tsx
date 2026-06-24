@@ -4,17 +4,18 @@ import { useMemo, useState } from "react";
 import Image from "next/image";
 import { Search, Edit2, Trash2 } from "lucide-react";
 import type { Recipe } from "@/components/RecipeCard";
-import { ADMIN_CATEGORIES } from "@/lib/admin-data";
+import type { AdminCategory } from "@/lib/admin-data";
 import { RecipeEditDialog } from "@/components/admin/RecipeEditDialog";
 import { ConfirmDeleteDialog } from "@/components/admin/ConfirmDeleteDialog";
 
 interface RecipesSectionProps {
   recipes: Recipe[];
+  categories: AdminCategory[];
   onUpdateRecipe: (recipe: Recipe) => void;
   onDeleteRecipe: (id: string) => void;
 }
 
-export function RecipesSection({ recipes, onUpdateRecipe, onDeleteRecipe }: RecipesSectionProps) {
+export function RecipesSection({ recipes, categories, onUpdateRecipe, onDeleteRecipe }: RecipesSectionProps) {
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("All Categories");
   const [editingRecipe, setEditingRecipe] = useState<Recipe | null>(null);
@@ -31,14 +32,14 @@ export function RecipesSection({ recipes, onUpdateRecipe, onDeleteRecipe }: Reci
   return (
     <div className="space-y-5">
       <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
-        <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl flex-1 max-w-sm" style={{ backgroundColor: "#fff", border: "1.5px solid rgba(92,64,51,0.1)" }}>
-          <Search size={15} style={{ color: "#8B6F47" }} />
+        <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl flex-1 max-w-sm" style={{ backgroundColor: "var(--ce-bg-card)", border: "1.5px solid var(--ce-border)" }}>
+          <Search size={15} style={{ color: "var(--ce-text-muted)" }} />
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search recipes…"
             className="bg-transparent outline-none text-sm flex-1"
-            style={{ color: "#5C4033", fontFamily: "'Inter', sans-serif" }}
+            style={{ color: "var(--ce-text)", fontFamily: "'Inter', sans-serif" }}
           />
         </div>
         <div className="flex items-center gap-2">
@@ -46,21 +47,21 @@ export function RecipesSection({ recipes, onUpdateRecipe, onDeleteRecipe }: Reci
             value={categoryFilter}
             onChange={(e) => setCategoryFilter(e.target.value)}
             className="px-3 py-2 rounded-xl text-sm outline-none"
-            style={{ backgroundColor: "#fff", color: "#5C4033", border: "1px solid rgba(92,64,51,0.1)", fontFamily: "'Inter', sans-serif" }}
+            style={{ backgroundColor: "var(--ce-bg-card)", color: "var(--ce-text)", border: "1px solid var(--ce-border)", fontFamily: "'Inter', sans-serif" }}
           >
             <option>All Categories</option>
-            {ADMIN_CATEGORIES.map((c) => <option key={c.slug}>{c.name}</option>)}
+            {categories.map((c) => <option key={c.slug}>{c.name}</option>)}
           </select>
         </div>
       </div>
 
-      <div className="rounded-2xl overflow-hidden" style={{ backgroundColor: "#fff", boxShadow: "0 2px 12px rgba(92,64,51,0.06)" }}>
+      <div className="rounded-2xl overflow-hidden" style={{ backgroundColor: "var(--ce-bg-card)", boxShadow: "0 2px 12px var(--ce-shadow)" }}>
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr style={{ backgroundColor: "#FAFAF8" }}>
+              <tr style={{ backgroundColor: "var(--ce-bg-surface)" }}>
                 {["Recipe", "Category", "Time", "Saves", "Actions"].map((h) => (
-                  <th key={h} className="px-5 py-3 text-left text-xs uppercase tracking-wider" style={{ color: "#8B6F47", fontWeight: 600 }}>
+                  <th key={h} className="px-5 py-3 text-left text-xs uppercase tracking-wider" style={{ color: "var(--ce-text-muted)", fontWeight: 600 }}>
                     {h}
                   </th>
                 ))}
@@ -68,25 +69,25 @@ export function RecipesSection({ recipes, onUpdateRecipe, onDeleteRecipe }: Reci
             </thead>
             <tbody>
               {filtered.map((r) => (
-                <tr key={r.id} className="border-t hover:bg-orange-50 transition-colors" style={{ borderColor: "rgba(92,64,51,0.05)" }}>
+                <tr key={r.id} className="border-t hover:bg-orange-50 transition-colors" style={{ borderColor: "var(--ce-border)" }}>
                   <td className="px-5 py-3">
                     <div className="flex items-center gap-3">
                       <div className="relative w-12 h-10 rounded-xl overflow-hidden flex-shrink-0">
                         <Image src={r.image} alt={r.title} fill sizes="48px" className="object-cover" />
                       </div>
                       <div>
-                        <div className="text-sm font-medium" style={{ color: "#5C4033" }}>{r.title}</div>
-                        <div className="text-xs" style={{ color: "#8B6F47" }}>by {r.author || "Chizzy"}</div>
+                        <div className="text-sm font-medium" style={{ color: "var(--ce-text)" }}>{r.title}</div>
+                        <div className="text-xs" style={{ color: "var(--ce-text-muted)" }}>by {r.author || "Chizzy"}</div>
                       </div>
                     </div>
                   </td>
                   <td className="px-5 py-3">
-                    <span className="text-xs px-2 py-0.5 rounded-full" style={{ backgroundColor: "#FFF8E7", color: "#FF8C42", fontWeight: 600 }}>
+                    <span className="text-xs px-2 py-0.5 rounded-full" style={{ backgroundColor: "var(--ce-bg-surface)", color: "#FF8C42", fontWeight: 600 }}>
                       {r.category}
                     </span>
                   </td>
-                  <td className="px-5 py-3 text-sm" style={{ color: "#8B6F47" }}>{r.time}</td>
-                  <td className="px-5 py-3 text-sm font-semibold" style={{ color: "#5C4033" }}>{r.saves?.toLocaleString()}</td>
+                  <td className="px-5 py-3 text-sm" style={{ color: "var(--ce-text-muted)" }}>{r.time}</td>
+                  <td className="px-5 py-3 text-sm font-semibold" style={{ color: "var(--ce-text)" }}>{r.saves?.toLocaleString()}</td>
                   <td className="px-5 py-3">
                     <div className="flex items-center gap-1.5">
                       <button onClick={() => setEditingRecipe(r)} className="p-1.5 rounded-lg transition-colors" style={{ color: "#FF8C42" }} title="Edit">
@@ -106,6 +107,7 @@ export function RecipesSection({ recipes, onUpdateRecipe, onDeleteRecipe }: Reci
 
       <RecipeEditDialog
         recipe={editingRecipe}
+        categories={categories}
         onOpenChange={(open) => !open && setEditingRecipe(null)}
         onSave={(recipe) => {
           onUpdateRecipe(recipe);

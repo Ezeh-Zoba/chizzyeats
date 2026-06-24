@@ -1,7 +1,8 @@
 import { initializeApp } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
-import { getFirestore } from "firebase-admin/firestore";
+import { getFirestore, FieldValue } from "firebase-admin/firestore";
 import { onCall, HttpsError } from "firebase-functions/v2/https";
+import { onDocumentWritten } from "firebase-functions/v2/firestore";
 
 initializeApp();
 
@@ -57,4 +58,37 @@ export const grantAdmin = onCall(async (request) => {
   );
 
   return { uid: targetUser.uid, email: targetUser.email };
+});
+
+/**
+ * Keeps recipes/{recipeId}.rating and ratingCount in sync with the
+ * ratings collection whenever a rating is created, changed, or deleted.
+ */
+export const onRatingWrite = onDocumentWritten("ratings/{ratingId}", async (event) => {
+  const recipeId = (event.data?.after.data() ?? event.data?.before.data())?.recipeId as string | undefined;
+  if (!recipeId) return;
+
+  const snapshot = await db.collection("ratings").where("recipeId", "==", recipeId).get();
+  const count = snapshot.size;
+  const average = count === 0
+    ? 0
+    : Math.round((snapshot.docs.reduce((sum, doc) => sum + (doc.data().value as number), 0) / count) * 10) / 10;
+
+  await db.collection("recipes").doc(recipeId).update({ rating: average, ratingCount: count });
+});
+
+/**
+ * Maintains a public, anonymous subscriber count on siteConfig/main so the
+ * homepage can show a real number without exposing the newsletter_subscribers
+ * collection (which is admin-read-only) to public reads.
+ */
+export const onNewsletterSubscriberWrite = onDocumentWritten("newsletter_subscribers/{subscriberId}", async (event) => {
+  const existedBefore = event.data?.before.exists;
+  const existsAfter = event.data?.after.exists;
+  if (existedBefore === existsAfter) return;
+
+  await db.collection("siteConfig").doc("main").set(
+    { subscriberCount: FieldValue.increment(existsAfter ? 1 : -1) },
+    { merge: true }
+  );
 });

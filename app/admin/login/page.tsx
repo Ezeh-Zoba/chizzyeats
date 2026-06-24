@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
   signInWithEmailAndPassword,
@@ -8,42 +8,46 @@ import {
   signInWithPopup,
   GoogleAuthProvider,
 } from "firebase/auth";
-import { httpsCallable } from "firebase/functions";
+import { httpsCallable, FunctionsError } from "firebase/functions";
 import { auth, functions } from "@/lib/firebase/client";
+
+async function postSession(idToken: string) {
+  const res = await fetch("/api/auth/session", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ idToken }),
+  });
+  if (!res.ok) throw new Error(`Failed to set session cookie (${res.status})`);
+}
 
 async function syncSessionAndBootstrap(router: ReturnType<typeof useRouter>) {
   const user = auth.currentUser;
   if (!user) return;
 
   const idToken = await user.getIdToken();
-  await fetch("/api/auth/session", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ idToken }),
-  });
+  await postSession(idToken);
 
-  // Try to claim the bootstrap admin slot. No-ops (rejected) once an admin
-  // already exists — safe to call on every sign-in.
   try {
     const grantAdmin = httpsCallable(functions, "grantAdmin");
     await grantAdmin({ email: user.email });
-    const refreshedToken = await user.getIdToken(true);
-    await fetch("/api/auth/session", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ idToken: refreshedToken }),
-    });
-  } catch {
-    // Not eligible for bootstrap — fine, continue as a regular signed-in user.
+  } catch (err) {
+    if (!(err instanceof FunctionsError) || err.code !== "functions/permission-denied") throw err;
   }
 
-  router.push("/admin");
+  const tokenResult = await user.getIdTokenResult(true);
+  await postSession(tokenResult.token);
+
+  router.push(tokenResult.claims.role === "admin" ? "/admin" : "/account");
   router.refresh();
 }
 
 export default function AdminLoginPage() {
   const router = useRouter();
   const [mode, setMode] = useState<"signin" | "signup">("signin");
+
+  useEffect(() => {
+    syncSessionAndBootstrap(router).catch(() => {});
+  }, []);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -83,20 +87,20 @@ export default function AdminLoginPage() {
   return (
     <div
       className="min-h-screen flex items-center justify-center px-4"
-      style={{ backgroundColor: "#FFF8E7", fontFamily: "'Inter', sans-serif" }}
+      style={{ backgroundColor: "var(--ce-bg)", fontFamily: "'Inter', sans-serif" }}
     >
       <div
         className="w-full max-w-sm p-8 rounded-3xl"
-        style={{ backgroundColor: "#fff", boxShadow: "0 8px 40px rgba(92,64,51,0.12)" }}
+        style={{ backgroundColor: "var(--ce-bg-card)", boxShadow: "0 8px 40px var(--ce-shadow-elevated)" }}
       >
         <h1
           className="mb-1 text-center"
-          style={{ fontFamily: "'Playfair Display', serif", fontSize: "28px", color: "#5C4033", fontWeight: 800 }}
+          style={{ fontFamily: "'Dancing Script', cursive", fontSize: "28px", color: "var(--ce-text)", fontWeight: 800 }}
         >
-          Chizzy's Eats
+          Chizzy Eats
         </h1>
-        <p className="mb-6 text-center text-sm" style={{ color: "#8B6F47" }}>
-          Admin sign in
+        <p className="mb-6 text-center text-sm" style={{ color: "var(--ce-text-muted)" }}>
+          Sign in to continue
         </p>
 
         {error && (
@@ -113,7 +117,7 @@ export default function AdminLoginPage() {
             onChange={(e) => setEmail(e.target.value)}
             placeholder="you@example.com"
             className="w-full px-4 py-3 rounded-2xl outline-none text-sm"
-            style={{ backgroundColor: "#FAFAF8", border: "1.5px solid rgba(92,64,51,0.15)", color: "#5C4033" }}
+            style={{ backgroundColor: "var(--ce-bg-surface)", border: "1.5px solid var(--ce-border)", color: "var(--ce-text)" }}
           />
           <input
             type="password"
@@ -122,7 +126,7 @@ export default function AdminLoginPage() {
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Password"
             className="w-full px-4 py-3 rounded-2xl outline-none text-sm"
-            style={{ backgroundColor: "#FAFAF8", border: "1.5px solid rgba(92,64,51,0.15)", color: "#5C4033" }}
+            style={{ backgroundColor: "var(--ce-bg-surface)", border: "1.5px solid var(--ce-border)", color: "var(--ce-text)" }}
           />
           <button
             type="submit"
@@ -144,9 +148,9 @@ export default function AdminLoginPage() {
         </button>
 
         <div className="my-5 flex items-center gap-3">
-          <div className="flex-1 h-px" style={{ backgroundColor: "rgba(92,64,51,0.12)" }} />
-          <span className="text-xs" style={{ color: "#8B6F47" }}>or</span>
-          <div className="flex-1 h-px" style={{ backgroundColor: "rgba(92,64,51,0.12)" }} />
+          <div className="flex-1 h-px" style={{ backgroundColor: "var(--ce-border)" }} />
+          <span className="text-xs" style={{ color: "var(--ce-text-muted)" }}>or</span>
+          <div className="flex-1 h-px" style={{ backgroundColor: "var(--ce-border)" }} />
         </div>
 
         <button
@@ -154,7 +158,7 @@ export default function AdminLoginPage() {
           onClick={handleGoogleSignIn}
           disabled={loading}
           className="w-full py-3 rounded-2xl text-sm transition-opacity disabled:opacity-60"
-          style={{ backgroundColor: "#fff", color: "#5C4033", fontWeight: 600, border: "1.5px solid rgba(92,64,51,0.15)" }}
+          style={{ backgroundColor: "var(--ce-bg-card)", color: "var(--ce-text)", fontWeight: 600, border: "1.5px solid var(--ce-border)" }}
         >
           Continue with Google
         </button>

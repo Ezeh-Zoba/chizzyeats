@@ -10,7 +10,7 @@ export function RelatedRecipes({ recipes }: RelatedRecipesProps) {
 
   return (
     <div>
-      <h2 className="mb-6" style={{ fontFamily: "'Playfair Display', serif", fontSize: "22px", color: "#5C4033", fontWeight: 700 }}>
+      <h2 className="mb-6" style={{ fontFamily: "'Dancing Script', cursive", fontSize: "22px", color: "var(--ce-text)", fontWeight: 700 }}>
         You Might Also Like
       </h2>
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">

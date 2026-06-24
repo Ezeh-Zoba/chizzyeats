@@ -2,10 +2,11 @@
 
 import { Suspense, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
-import { SAMPLE_RECIPES } from "@/lib/mock-recipes";
+import { useRecipes } from "@/hooks/useRecipes";
 import { useRecipeFilters } from "@/hooks/useRecipeFilters";
 import { CategoryFilters } from "@/components/category/CategoryFilters";
 import { CategoryResults } from "@/components/category/CategoryResults";
+import { CategoryNavStrip } from "@/components/category/CategoryNavStrip";
 
 export default function SearchPage() {
   return (
@@ -18,7 +19,8 @@ export default function SearchPage() {
 function SearchPageContent() {
   const searchParams = useSearchParams();
   const query = searchParams.get("q") || "";
-  const filters = useRecipeFilters(SAMPLE_RECIPES);
+  const { recipes } = useRecipes();
+  const filters = useRecipeFilters(recipes);
 
   useEffect(() => {
     filters.setSearch(query);
@@ -26,12 +28,15 @@ function SearchPageContent() {
   }, [query]);
 
   return (
-    <div style={{ fontFamily: "'Inter', sans-serif", backgroundColor: "#FAFAF8", minHeight: "100vh" }}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-10">
+    <div style={{ fontFamily: "'Inter', sans-serif", backgroundColor: "var(--ce-bg)", minHeight: "100vh" }}>
+      <div className="pt-20">
+        <CategoryNavStrip currentSlug="" />
+      </div>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-10">
         <p className="text-xs mb-2 uppercase tracking-widest" style={{ color: "#FF8C42", fontWeight: 600 }}>
           Search Results
         </p>
-        <h1 className="mb-8" style={{ fontFamily: "'Playfair Display', serif", fontSize: "clamp(28px, 4vw, 40px)", color: "#5C4033", fontWeight: 700 }}>
+        <h1 className="mb-8" style={{ fontFamily: "'Dancing Script', cursive", fontSize: "clamp(28px, 4vw, 40px)", color: "var(--ce-text)", fontWeight: 700 }}>
           {query ? `Results for "${query}"` : "Search Recipes"}
         </h1>
 

@@ -1,27 +1,72 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { CheckCircle, Trash2 } from "lucide-react";
-import { ADMIN_COMMENTS, type AdminComment } from "@/lib/admin-data";
+import { collection, deleteDoc, doc, getDocs, orderBy, query, Timestamp, updateDoc } from "firebase/firestore";
+import { db } from "@/lib/firebase/client";
 
-const TABS = ["All", "Pending", "Approved", "Spam"] as const;
+interface FirestoreComment {
+  id: string;
+  recipeId: string;
+  userName: string;
+  text: string;
+  status: "pending" | "approved";
+  createdAt: Timestamp | null;
+}
+
+const TABS = ["All", "Pending", "Approved"] as const;
 type Tab = (typeof TABS)[number];
 
-function matchesTab(comment: AdminComment, tab: Tab): boolean {
+function matchesTab(comment: FirestoreComment, tab: Tab): boolean {
   if (tab === "All") return true;
   return comment.status === tab.toLowerCase();
 }
 
 export function CommentsSection() {
-  const [commentList, setCommentList] = useState(ADMIN_COMMENTS);
+  const [commentList, setCommentList] = useState<FirestoreComment[]>([]);
+  const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<Tab>("All");
 
-  const approve = (id: number) => setCommentList(commentList.map((c) => (c.id === id ? { ...c, status: "approved" } : c)));
-  const remove = (id: number) => setCommentList(commentList.filter((c) => c.id !== id));
+  useEffect(() => {
+    let active = true;
+    const q = query(collection(db, "comments"), orderBy("createdAt", "desc"));
+    getDocs(q)
+      .then((snapshot) => {
+        if (!active) return;
+        setCommentList(
+          snapshot.docs.map((d) => {
+            const data = d.data();
+            return {
+              id: d.id,
+              recipeId: data.recipeId,
+              userName: data.userName ?? "Anonymous",
+              text: data.text ?? "",
+              status: data.status === "approved" ? "approved" : "pending",
+              createdAt: data.createdAt ?? null,
+            };
+          })
+        );
+      })
+      .finally(() => active && setLoading(false));
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const approve = async (id: string) => {
+    await updateDoc(doc(db, "comments", id), { status: "approved" });
+    setCommentList(commentList.map((c) => (c.id === id ? { ...c, status: "approved" } : c)));
+  };
+
+  const remove = async (id: string) => {
+    await deleteDoc(doc(db, "comments", id));
+    setCommentList(commentList.filter((c) => c.id !== id));
+  };
+
   const visible = commentList.filter((c) => matchesTab(c, activeTab));
 
   return (
-    <div className="space-y-4 max-w-3xl">
+    <div className="space-y-4 w-full">
       <div className="flex items-center gap-3 mb-5">
         {TABS.map((tab) => (
           <button
@@ -29,10 +74,10 @@ export function CommentsSection() {
             onClick={() => setActiveTab(tab)}
             className="px-4 py-1.5 rounded-full text-sm"
             style={{
-              backgroundColor: activeTab === tab ? "#FFC72C" : "#fff",
-              color: activeTab === tab ? "#5C4033" : "#8B6F47",
+              backgroundColor: activeTab === tab ? "#FFC72C" : "var(--ce-bg-card)",
+              color: activeTab === tab ? "#5C4033" : "var(--ce-text-muted)",
               fontWeight: activeTab === tab ? 700 : 400,
-              boxShadow: "0 1px 6px rgba(92,64,51,0.07)",
+              boxShadow: "0 1px 6px var(--ce-shadow)",
             }}
           >
             {tab}
@@ -40,28 +85,30 @@ export function CommentsSection() {
         ))}
       </div>
 
-      {visible.length === 0 && (
-        <p className="text-sm text-center py-10" style={{ color: "#8B6F47" }}>No {activeTab.toLowerCase()} comments.</p>
+      {!loading && visible.length === 0 && (
+        <p className="text-sm text-center py-10" style={{ color: "var(--ce-text-muted)" }}>No {activeTab.toLowerCase()} comments.</p>
       )}
 
       {visible.map((c) => (
-        <div key={c.id} className="p-5 rounded-2xl" style={{ backgroundColor: "#fff", boxShadow: "0 2px 12px rgba(92,64,51,0.06)" }}>
+        <div key={c.id} className="p-5 rounded-2xl" style={{ backgroundColor: "var(--ce-bg-card)", boxShadow: "0 2px 12px var(--ce-shadow)" }}>
           <div className="flex items-start justify-between gap-4">
             <div className="flex items-start gap-3">
               <div
                 className="w-9 h-9 rounded-full flex items-center justify-center text-sm flex-shrink-0"
                 style={{ background: "linear-gradient(135deg, #FFC72C, #FF8C42)", color: "#5C4033", fontWeight: 700 }}
               >
-                {c.author[0]}
+                {c.userName[0]?.toUpperCase() ?? "?"}
               </div>
               <div>
                 <div className="flex items-center gap-2 mb-0.5">
-                  <span className="text-sm font-semibold" style={{ color: "#5C4033" }}>{c.author}</span>
-                  <span className="text-xs" style={{ color: "#8B6F47" }}>on</span>
-                  <span className="text-xs font-medium" style={{ color: "#FF8C42" }}>{c.recipe}</span>
-                  <span className="text-xs" style={{ color: "#8B6F47" }}>• {c.time}</span>
+                  <span className="text-sm font-semibold" style={{ color: "var(--ce-text)" }}>{c.userName}</span>
+                  <span className="text-xs" style={{ color: "var(--ce-text-muted)" }}>on</span>
+                  <a href={`/recipe/${c.recipeId}`} className="text-xs font-medium" style={{ color: "#FF8C42" }}>{c.recipeId}</a>
+                  {c.createdAt && (
+                    <span className="text-xs" style={{ color: "var(--ce-text-muted)" }}>• {c.createdAt.toDate().toLocaleDateString()}</span>
+                  )}
                 </div>
-                <p className="text-sm" style={{ color: "#5C4033" }}>{c.text}</p>
+                <p className="text-sm" style={{ color: "var(--ce-text)" }}>{c.text}</p>
               </div>
             </div>
             <span

@@ -1,4 +1,6 @@
-import { SAMPLE_RECIPES } from "@/lib/mock-recipes";
+"use client";
+
+import { useRecipes } from "@/hooks/useRecipes";
 import { HeroSection } from "@/components/home/HeroSection";
 import { CategoryGrid } from "@/components/home/CategoryGrid";
 import { FeaturedRecipesSection } from "@/components/home/FeaturedRecipesSection";
@@ -8,12 +10,13 @@ import { AboutChizzySection } from "@/components/home/AboutChizzySection";
 import { NewsletterSection } from "@/components/home/NewsletterSection";
 
 export default function HomePage() {
-  const featuredRecipes = SAMPLE_RECIPES.slice(0, 3);
-  const latestRecipes = SAMPLE_RECIPES.slice(3, 7);
-  const quickRecipes = SAMPLE_RECIPES.filter((r) => r.difficulty === "Easy").slice(0, 3);
+  const { recipes } = useRecipes();
+  const featuredRecipes = recipes.slice(0, 3);
+  const latestRecipes = recipes.slice(3, 7);
+  const quickRecipes = recipes.filter((r) => r.difficulty === "Easy").slice(0, 3);
 
   return (
-    <div style={{ fontFamily: "'Inter', sans-serif", backgroundColor: "#FAFAF8" }}>
+    <div style={{ fontFamily: "'Inter', sans-serif", backgroundColor: "var(--ce-bg)" }}>
       <HeroSection />
       <CategoryGrid />
       <FeaturedRecipesSection recipes={featuredRecipes} />

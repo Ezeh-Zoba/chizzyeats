@@ -3,6 +3,7 @@ import { GiNoodles, GiCroissant, GiHamburger, GiCakeSlice, GiSodaCan, GiMoneySta
 import { PiLightningFill } from "react-icons/pi";
 
 export interface CategoryMeta {
+  label: string;
   title: string;
   description: string;
   banner: string;
@@ -11,60 +12,73 @@ export interface CategoryMeta {
 
 export const CATEGORY_META: Record<string, CategoryMeta> = {
   nigerian: {
+    label: "Nigerian",
     title: "Nigerian Recipes",
     description: "Authentic Nigerian dishes passed down through generations — jollof rice, egusi soup, suya, puff puff, and so much more.",
-    banner: "https://images.unsplash.com/photo-1536304993881-ff6e9eefa2a6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxyaWNlJTIwc3RldyUyMHNvdXAlMjBib3dsJTIwZm9vZHxlbnwxfHx8fDE3ODIwNjc1MDB8MA&ixlib=rb-4.1.0&q=80&w=1080",
+    banner: "/images/recipes/creamy-penne-pasta.png",
     icon: "🇳🇬",
   },
   african: {
+    label: "African",
     title: "African Dishes",
     description: "Vibrant flavours from across the African continent — Ghanaian, Kenyan, Ethiopian, and beyond.",
-    banner: "https://images.unsplash.com/photo-1568600891621-50f697b9a1c7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmb29kJTIwcGhvdG9ncmFwaHklMjBoZXJvJTIwZ291cm1ldCUyMG1lYWx8ZW58MXx8fHwxNzgyMDY3NDk2fDA&ixlib=rb-4.1.0&q=80&w=1080",
+    banner: "/images/recipes/dumplings-noodles-boiled.png",
     icon: "🌍",
   },
   asian: {
+    label: "Asian",
     title: "Asian Cuisine",
     description: "From Thai curries to Japanese ramen, explore the rich tapestry of Asian flavours.",
-    banner: "https://images.unsplash.com/photo-1552166539-ade937e98ed7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwzfHxmb29kJTIwcGhvdG9ncmFwaHklMjBoZXJvJTIwZ291cm1ldCUyMG1lYWx8ZW58MXx8fHwxNzgyMDY3NDk2fDA&ixlib=rb-4.1.0&q=80&w=1080",
+    banner: "/images/recipes/dumplings-noodles.png",
     icon: GiNoodles,
   },
   desserts: {
+    label: "Desserts",
     title: "Desserts & Sweets",
     description: "Life is short — eat dessert first. Cakes, pastries, puddings, and every sweet thing in between.",
-    banner: "https://images.unsplash.com/photo-1514056052883-d017fddd0426?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxkZXNzZXJ0cyUyMHBhc3RyaWVzJTIwY2FrZXMlMjBmb29kJTIwcGhvdG9ncmFwaHl8ZW58MXx8fHwxNzgyMDY3NDkzfDA&ixlib=rb-4.1.0&q=80&w=1080",
+    banner: "/images/recipes/korean-hotteok.png",
     icon: GiCakeSlice,
   },
   drinks: {
+    label: "Drinks",
     title: "Drinks & Beverages",
     description: "Refreshing smoothies, cocktails, zobo, kunu, and every sip-worthy creation.",
-    banner: "https://images.unsplash.com/photo-1622597467836-f3285f2131b8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjb2NrdGFpbCUyMGRyaW5rJTIwc21vb3RoaWUlMjJiZXZlcmFnZXxlbnwxfHx8fDE3ODIwNjc1MDF8MA&ixlib=rb-4.1.0&q=80&w=1080",
+    banner: "/images/recipes/boba-milk-tea.png",
     icon: GiSodaCan,
   },
   european: {
+    label: "European",
     title: "European Cuisine",
-    description: "Classic French, Italian, Spanish, and British recipes with a Chizzy's Eats twist.",
-    banner: "https://images.unsplash.com/photo-1467003909585-2f8a72700288?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwyfHxmb29kJTIwcGhvdG9ncmFwaHklMjBoZXJvJTIwZ291cm1ldCUyMG1lYWx8ZW58MXx8fHwxNzgyMDY3NDk2fDA&ixlib=rb-4.1.0&q=80&w=1080",
+    description: "Classic French, Italian, Spanish, and British recipes with a Chizzy Eats twist.",
+    banner: "/images/recipes/creamy-penne-pasta.png",
     icon: GiCroissant,
   },
   american: {
+    label: "American",
     title: "American Classics",
     description: "Comfort food done right — burgers, BBQ, mac & cheese, and hearty grain bowls.",
-    banner: "https://images.unsplash.com/photo-1674649203068-e9fd9c4a5620?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHw0fHxmb29kJTIwcGhvdG9ncmFwaHklMjBoZXJvJTIwZ291cm1ldCUyMG1lYWx8ZW58MXx8fHwxNzgyMDY3NDk2fDA&ixlib=rb-4.1.0&q=80&w=1080",
+    banner: "/images/recipes/chicken-sandwich.png",
     icon: GiHamburger,
   },
   budget: {
+    label: "Budget Meals",
     title: "Budget Meals",
     description: "Delicious meals that won't break the bank. Proof that great food doesn't need to cost a fortune.",
-    banner: "https://images.unsplash.com/photo-1591189863430-ab87e120f312?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwzfHxyZWNpcGUlMjBjb29raW5nJTIwa2l0Y2hlbiUyMGluZ3JlZGllbnRzfGVufDF8fHx8MTc4MjA2NzQ5Nnww&ixlib=rb-4.1.0&q=80&w=1080",
+    banner: "/images/recipes/coconut-pancakes.png",
     icon: GiMoneyStack,
   },
   quick: {
+    label: "Quick Meals",
     title: "Quick Meals",
     description: "Ready in 30 minutes or less. Because good food shouldn't take all day.",
-    banner: "https://images.unsplash.com/photo-1579150877125-53b49ce88315?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHw3fHxyZWNpcGUlMjBjb29raW5nJTIwa2l0Y2hlbiUyMGluZ3JlZGllbnRzfGVufDF8fHx8MTc4MjA2NzQ5Nnww&ixlib=rb-4.1.0&q=80&w=1080",
+    banner: "/images/recipes/chicken-pepper-pizza.png",
     icon: PiLightningFill,
   },
 };
+
+// The region/country categories — distinct from type tags like Desserts,
+// Drinks, Budget Meals, Quick Meals (mirrors Navbar's "By Region" group).
+export const CUISINE_SLUGS = ["nigerian", "african", "asian", "european", "american"];
 
 export const SUBCATEGORY_TABS = ["All", "Main Dishes", "Desserts", "Drinks", "Quick"];
 export const DIFFICULTIES = ["All", "Easy", "Medium", "Hard"];

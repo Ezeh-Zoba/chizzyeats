@@ -47,7 +47,7 @@ export function Logo({ variant = "primary", size = "md" }: LogoProps) {
               lineHeight: 1.1,
             }}
           >
-            Chizzy's
+            Chizzy
           </span>
           <span
             style={{
