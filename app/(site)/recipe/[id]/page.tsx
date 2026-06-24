@@ -40,6 +40,7 @@ export default function RecipeDetailPage() {
   const [loading, setLoading] = useState(true);
   const [checked, setChecked] = useState<Set<number>>(new Set());
   const [saved, setSaved] = useState(false);
+  const [savesCount, setSavesCount] = useState(0);
   const [signInOpen, setSignInOpen] = useState(false);
   const [activeGallery, setActiveGallery] = useState(0);
   const [servings, setServings] = useState(4);
@@ -52,6 +53,7 @@ export default function RecipeDetailPage() {
         if (!active || !snap.exists()) return;
         const data = { id: snap.id, ...snap.data() } as Recipe;
         setRecipe(data);
+        setSavesCount(data.saves ?? 0);
         setServings(data.servings || 4);
       })
       .finally(() => active && setLoading(false));
@@ -92,9 +94,11 @@ export default function RecipeDetailPage() {
     if (saved) {
       await deleteDoc(saveRef);
       await updateDoc(recipeRef, { saves: increment(-1) });
+      setSavesCount((c) => c - 1);
     } else {
       await setDoc(saveRef, { userId: user.uid, recipeId: recipe.id, createdAt: new Date() });
       await updateDoc(recipeRef, { saves: increment(1) });
+      setSavesCount((c) => c + 1);
     }
     setSaved(!saved);
   };
@@ -113,11 +117,12 @@ export default function RecipeDetailPage() {
 
   const relatedRecipes = allRecipes.filter((r) => r.id !== recipe.id && r.categorySlug === recipe.categorySlug).slice(0, 3);
   const galleryImages = recipe.galleryImages?.length ? recipe.galleryImages : [recipe.image];
+  const recipeWithLiveSaves = { ...recipe, saves: savesCount };
 
   return (
     <div style={{ fontFamily: "'Inter', sans-serif", backgroundColor: "var(--ce-bg)", minHeight: "100vh" }}>
       <RecipeHero
-        recipe={recipe}
+        recipe={recipeWithLiveSaves}
         galleryImages={galleryImages}
         activeImage={galleryImages[activeGallery]}
         liked={saved}
@@ -192,7 +197,7 @@ export default function RecipeDetailPage() {
           </div>
 
           <div className="print:hidden">
-            <RecipeSidebar recipe={recipe} />
+            <RecipeSidebar recipe={recipeWithLiveSaves} />
           </div>
         </div>
       </div>

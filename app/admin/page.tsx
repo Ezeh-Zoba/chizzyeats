@@ -236,7 +236,20 @@ export default function AdminDashboard() {
           />
         );
       case "recipes":
-        return <RecipesSection recipes={uniqueRecipes} onUpdateRecipe={updateRecipe} onDeleteRecipe={deleteRecipe} categories={categoriesWithCounts} />;
+        return <RecipesSection
+          recipes={uniqueRecipes}
+          categories={categoriesWithCounts}
+          onUpdateRecipe={updateRecipe}
+          onDeleteRecipe={deleteRecipe}
+          onTogglePublish={(recipe) => {
+            const newStatus = recipe.status === "published" ? "draft" : "published";
+            updateRecipe({
+              ...recipe,
+              status: newStatus,
+              publishedAt: newStatus === "published" ? new Date() : null,
+            } as Recipe);
+          }}
+        />;
       case "create":
         return <CreateRecipeSection formData={formData} setFormData={setFormData} categories={categoriesWithCounts} onCreate={createRecipe} />;
       case "comments":

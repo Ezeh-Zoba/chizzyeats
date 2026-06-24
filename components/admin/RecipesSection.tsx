@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Image from "next/image";
-import { Search, Edit2, Trash2 } from "lucide-react";
+import { Search, Edit2, Trash2, Eye, EyeOff } from "lucide-react";
 import type { Recipe } from "@/components/RecipeCard";
 import type { AdminCategory } from "@/lib/admin-data";
 import { RecipeEditDialog } from "@/components/admin/RecipeEditDialog";
@@ -13,9 +13,10 @@ interface RecipesSectionProps {
   categories: AdminCategory[];
   onUpdateRecipe: (recipe: Recipe) => void;
   onDeleteRecipe: (id: string) => void;
+  onTogglePublish: (recipe: Recipe) => void;
 }
 
-export function RecipesSection({ recipes, categories, onUpdateRecipe, onDeleteRecipe }: RecipesSectionProps) {
+export function RecipesSection({ recipes, categories, onUpdateRecipe, onDeleteRecipe, onTogglePublish }: RecipesSectionProps) {
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("All Categories");
   const [editingRecipe, setEditingRecipe] = useState<Recipe | null>(null);
@@ -60,7 +61,7 @@ export function RecipesSection({ recipes, categories, onUpdateRecipe, onDeleteRe
           <table className="w-full">
             <thead>
               <tr style={{ backgroundColor: "var(--ce-bg-surface)" }}>
-                {["Recipe", "Category", "Time", "Saves", "Actions"].map((h) => (
+                {["Recipe", "Category", "Time", "Status", "Saves", "Actions"].map((h) => (
                   <th key={h} className="px-5 py-3 text-left text-xs uppercase tracking-wider" style={{ color: "var(--ce-text-muted)", fontWeight: 600 }}>
                     {h}
                   </th>
@@ -87,11 +88,29 @@ export function RecipesSection({ recipes, categories, onUpdateRecipe, onDeleteRe
                     </span>
                   </td>
                   <td className="px-5 py-3 text-sm" style={{ color: "var(--ce-text-muted)" }}>{r.time}</td>
+                  <td className="px-5 py-3">
+                    <span
+                      className="text-xs px-2 py-0.5 rounded-full font-semibold"
+                      style={r.status === "published"
+                        ? { backgroundColor: "#dcfce7", color: "#16a34a" }
+                        : { backgroundColor: "var(--ce-bg-surface)", color: "var(--ce-text-muted)" }}
+                    >
+                      {r.status === "published" ? "Live" : "Draft"}
+                    </span>
+                  </td>
                   <td className="px-5 py-3 text-sm font-semibold" style={{ color: "var(--ce-text)" }}>{r.saves?.toLocaleString()}</td>
                   <td className="px-5 py-3">
                     <div className="flex items-center gap-1.5">
                       <button onClick={() => setEditingRecipe(r)} className="p-1.5 rounded-lg transition-colors" style={{ color: "#FF8C42" }} title="Edit">
                         <Edit2 size={13} />
+                      </button>
+                      <button
+                        onClick={() => onTogglePublish(r)}
+                        className="p-1.5 rounded-lg transition-colors"
+                        style={{ color: r.status === "published" ? "#22c55e" : "var(--ce-text-muted)" }}
+                        title={r.status === "published" ? "Unpublish" : "Publish"}
+                      >
+                        {r.status === "published" ? <Eye size={13} /> : <EyeOff size={13} />}
                       </button>
                       <button onClick={() => setDeletingRecipe(r)} className="p-1.5 rounded-lg transition-colors" style={{ color: "#ef4444" }} title="Delete">
                         <Trash2 size={13} />
