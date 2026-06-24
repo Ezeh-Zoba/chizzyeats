@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Plus, X } from "lucide-react";
+import { Plus, X, Image as ImageIcon } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import type { Recipe, RecipeIngredient, RecipeStep } from "@/components/RecipeCard";
 import type { AdminCategory } from "@/lib/admin-data";
+import { uploadRecipeImage } from "@/lib/firebase/storage-helpers";
 
 interface RecipeEditDialogProps {
   recipe: Recipe | null;
@@ -24,6 +25,7 @@ const labelStyle = { color: "var(--ce-text)", fontWeight: 600 } as const;
 
 export function RecipeEditDialog({ recipe, categories, onOpenChange, onSave }: RecipeEditDialogProps) {
   const [form, setForm] = useState<Recipe | null>(recipe);
+  const [galleryUploading, setGalleryUploading] = useState(false);
 
   useEffect(() => setForm(recipe), [recipe]);
 
@@ -264,40 +266,58 @@ export function RecipeEditDialog({ recipe, categories, onOpenChange, onSave }: R
           </div>
 
           <div>
-            <label className="block text-sm mb-1.5" style={labelStyle}>Gallery Images (URLs)</label>
-            <div className="space-y-2">
-              {(form.galleryImages ?? []).map((url, i) => (
-                <div key={i} className="flex gap-2">
-                  <input
-                    value={url}
-                    onChange={(e) => {
-                      const next = [...(form.galleryImages ?? [])];
-                      next[i] = e.target.value;
-                      setForm({ ...form, galleryImages: next });
-                    }}
-                    placeholder="https://..."
-                    className="flex-1 px-3 py-2 rounded-xl outline-none text-sm"
-                    style={inputStyle}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setForm({ ...form, galleryImages: (form.galleryImages ?? []).filter((_, j) => j !== i) })}
-                    className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
-                    style={{ backgroundColor: "var(--ce-bg-surface)", color: "var(--ce-text-muted)" }}
-                  >
-                    <X size={14} />
-                  </button>
-                </div>
-              ))}
-            </div>
-            <button
-              type="button"
-              onClick={() => setForm({ ...form, galleryImages: [...(form.galleryImages ?? []), ""] })}
-              className="mt-2 flex items-center gap-1.5 text-sm"
-              style={{ color: "#FF8C42", fontWeight: 600 }}
+            <label className="block text-sm mb-1.5" style={labelStyle}>Photo Gallery</label>
+            {(form.galleryImages ?? []).length > 0 && (
+              <div className="grid grid-cols-3 gap-2 mb-3">
+                {(form.galleryImages ?? []).map((url, i) => (
+                  <div key={i} className="relative aspect-square rounded-xl overflow-hidden">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={url} alt={`Gallery ${i + 1}`} className="w-full h-full object-cover" />
+                    <button
+                      type="button"
+                      onClick={() => setForm({ ...form, galleryImages: (form.galleryImages ?? []).filter((_, j) => j !== i) })}
+                      className="absolute top-1 right-1 w-6 h-6 rounded-full flex items-center justify-center"
+                      style={{ backgroundColor: "rgba(0,0,0,0.65)", color: "#fff" }}
+                    >
+                      <X size={11} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+            <label
+              className="flex items-center gap-2 cursor-pointer text-sm"
+              style={{ color: galleryUploading ? "var(--ce-text-muted)" : "#FF8C42", fontWeight: 600, pointerEvents: galleryUploading ? "none" : "auto" }}
             >
-              <Plus size={14} /> Add Gallery Image URL
-            </button>
+              {galleryUploading ? (
+                <><ImageIcon size={14} /> Uploading…</>
+              ) : (
+                <><Plus size={14} /> Add Gallery Photos</>
+              )}
+              <input
+                type="file"
+                accept="image/*"
+                multiple
+                disabled={galleryUploading}
+                className="hidden"
+                onChange={async (e) => {
+                  const files = Array.from(e.target.files ?? []);
+                  if (!files.length) return;
+                  setGalleryUploading(true);
+                  try {
+                    const urls = await Promise.all(
+                      files.map((file, i) =>
+                        uploadRecipeImage(file, `${form.id}-gallery-${Date.now()}-${i}`)
+                      )
+                    );
+                    setForm({ ...form, galleryImages: [...(form.galleryImages ?? []), ...urls] });
+                  } finally {
+                    setGalleryUploading(false);
+                    e.target.value = "";
+                  }
+                }}
+              />
+            </label>
           </div>
         </div>
 

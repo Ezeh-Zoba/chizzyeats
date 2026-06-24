@@ -9,6 +9,7 @@ import {
   getDoc,
   getDocs,
   limit,
+  onSnapshot,
   orderBy,
   query,
   setDoc,
@@ -74,10 +75,16 @@ export default function AdminDashboard() {
     let active = true;
     setLoadError(null);
 
+    // Real-time listener for recipes so saves/rating changes on the public
+    // site are reflected immediately in the admin table without a page reload.
+    const unsubRecipes = onSnapshot(collection(db, "recipes"), (snap) => {
+      if (!active) return;
+      setRecipes(snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Recipe));
+    });
+
     async function load() {
       try {
-        const [recipesSnap, categoriesSnap, commentsCountSnap, siteConfigSnap, pendingCommentsSnap, blogSnap] = await Promise.all([
-          getDocs(collection(db, "recipes")),
+        const [categoriesSnap, commentsCountSnap, siteConfigSnap, pendingCommentsSnap, blogSnap] = await Promise.all([
           getDocs(collection(db, "categories")),
           getCountFromServer(collection(db, "comments")),
           getDoc(doc(db, "siteConfig", "main")),
@@ -99,7 +106,6 @@ export default function AdminDashboard() {
         }
 
         if (!active) return;
-        setRecipes(recipesSnap.docs.map((d) => ({ id: d.id, ...d.data() }) as Recipe));
         setBlogPosts(blogSnap.docs.map((d) => ({ id: d.id, ...d.data() }) as BlogPost));
         setCategories(loadedCategories);
         setCommentCount(commentsCountSnap.data().count);
@@ -128,6 +134,7 @@ export default function AdminDashboard() {
     load();
     return () => {
       active = false;
+      unsubRecipes();
     };
   }, [loadAttempt]);
 
