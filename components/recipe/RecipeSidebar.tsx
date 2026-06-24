@@ -99,7 +99,7 @@ export function RecipeSidebar({ recipe, relatedRecipes, onRatingChange }: Recipe
   };
 
   return (
-    <div className="w-full">
+    <>
       <div className="sticky top-24 space-y-4">
         <button
           onClick={() => window.print()}
@@ -236,6 +236,6 @@ export function RecipeSidebar({ recipe, relatedRecipes, onRatingChange }: Recipe
       />
 
       <SignInModal open={signInOpen} onOpenChange={setSignInOpen} />
-    </div>
+    </>
   );
 }
