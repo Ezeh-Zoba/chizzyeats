@@ -67,12 +67,12 @@ export function CommentsSection() {
 
   return (
     <div className="space-y-4 w-full">
-      <div className="flex items-center gap-3 mb-5">
+      <div className="flex items-center gap-3 mb-5 overflow-x-auto pb-1">
         {TABS.map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className="px-4 py-1.5 rounded-full text-sm"
+            className="px-4 py-1.5 rounded-full text-sm whitespace-nowrap flex-shrink-0"
             style={{
               backgroundColor: activeTab === tab ? "#FFC72C" : "var(--ce-bg-card)",
               color: activeTab === tab ? "#5C4033" : "var(--ce-text-muted)",
@@ -90,7 +90,7 @@ export function CommentsSection() {
       )}
 
       {visible.map((c) => (
-        <div key={c.id} className="p-5 rounded-2xl" style={{ backgroundColor: "var(--ce-bg-card)", boxShadow: "0 2px 12px var(--ce-shadow)" }}>
+        <div key={c.id} className="p-3 sm:p-5 rounded-2xl" style={{ backgroundColor: "var(--ce-bg-card)", boxShadow: "0 2px 12px var(--ce-shadow)" }}>
           <div className="flex items-start justify-between gap-4">
             <div className="flex items-start gap-3">
               <div
@@ -100,13 +100,15 @@ export function CommentsSection() {
                 {c.userName[0]?.toUpperCase() ?? "?"}
               </div>
               <div>
-                <div className="flex items-center gap-2 mb-0.5">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-2 mb-0.5">
                   <span className="text-sm font-semibold" style={{ color: "var(--ce-text)" }}>{c.userName}</span>
-                  <span className="text-xs" style={{ color: "var(--ce-text-muted)" }}>on</span>
-                  <a href={`/recipe/${c.recipeId}`} className="text-xs font-medium" style={{ color: "#FF8C42" }}>{c.recipeId}</a>
-                  {c.createdAt && (
-                    <span className="text-xs" style={{ color: "var(--ce-text-muted)" }}>• {c.createdAt.toDate().toLocaleDateString()}</span>
-                  )}
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <span className="text-xs" style={{ color: "var(--ce-text-muted)" }}>on</span>
+                    <a href={`/recipe/${c.recipeId}`} className="text-xs font-medium" style={{ color: "#FF8C42" }}>{c.recipeId}</a>
+                    {c.createdAt && (
+                      <span className="text-xs" style={{ color: "var(--ce-text-muted)" }}>• {c.createdAt.toDate().toLocaleDateString()}</span>
+                    )}
+                  </div>
                 </div>
                 <p className="text-sm" style={{ color: "var(--ce-text)" }}>{c.text}</p>
               </div>
@@ -118,7 +120,7 @@ export function CommentsSection() {
               {c.status}
             </span>
           </div>
-          <div className="flex gap-2 mt-4 ml-12">
+          <div className="flex gap-2 mt-4 ml-0 sm:ml-12">
             {c.status === "pending" && (
               <button onClick={() => approve(c.id)} className="flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs" style={{ backgroundColor: "#f0fdf4", color: "#22c55e", fontWeight: 600 }}>
                 <CheckCircle size={12} /> Approve

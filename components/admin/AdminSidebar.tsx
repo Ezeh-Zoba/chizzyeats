@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signOut } from "firebase/auth";
-import { ChevronRight, Home, LogOut } from "lucide-react";
+import { ChevronRight, Home, LogOut, X } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { auth } from "@/lib/firebase/client";
 import { ADMIN_SIDEBAR_NAV } from "@/lib/admin-data";
@@ -13,9 +13,21 @@ interface AdminSidebarProps {
   onSectionChange: (id: string) => void;
   collapsed: boolean;
   onToggleCollapsed: () => void;
+  mobileOpen: boolean;
+  onClose: () => void;
 }
 
-export function AdminSidebar({ activeSection, onSectionChange, collapsed, onToggleCollapsed }: AdminSidebarProps) {
+function NavContent({
+  activeSection,
+  onSectionChange,
+  collapsed,
+  onClose,
+}: {
+  activeSection: string;
+  onSectionChange: (id: string) => void;
+  collapsed: boolean;
+  onClose?: () => void;
+}) {
   const router = useRouter();
 
   const handleSignOut = async () => {
@@ -24,27 +36,18 @@ export function AdminSidebar({ activeSection, onSectionChange, collapsed, onTogg
     router.push("/admin/login");
   };
 
-  return (
-    <aside
-      className="flex flex-col"
-      style={{ width: collapsed ? "64px" : "220px", backgroundColor: "var(--ce-bg-admin-sidebar)", transition: "width 0.25s ease", flexShrink: 0 }}
-    >
-      <div className="flex items-center justify-between px-4 py-5 border-b" style={{ borderColor: "rgba(255,199,44,0.15)" }}>
-        {!collapsed && <Logo variant="white" size="sm" />}
-        <button
-          onClick={onToggleCollapsed}
-          className="p-1.5 rounded-lg transition-colors flex-shrink-0"
-          style={{ color: "rgba(255,248,231,0.6)" }}
-        >
-          <ChevronRight size={16} style={{ transform: collapsed ? "rotate(0)" : "rotate(180deg)", transition: "transform 0.25s" }} />
-        </button>
-      </div>
+  const handleNav = (id: string) => {
+    onSectionChange(id);
+    onClose?.();
+  };
 
+  return (
+    <>
       <nav className="flex-1 py-4 space-y-1 px-2 overflow-y-auto">
         {ADMIN_SIDEBAR_NAV.map(({ icon: Icon, label, id }) => (
           <button
             key={id}
-            onClick={() => onSectionChange(id)}
+            onClick={() => handleNav(id)}
             className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm transition-all duration-200"
             style={{
               backgroundColor: activeSection === id ? "rgba(255,199,44,0.2)" : "transparent",
@@ -74,6 +77,47 @@ export function AdminSidebar({ activeSection, onSectionChange, collapsed, onTogg
           {!collapsed && <span>Sign Out</span>}
         </button>
       </div>
-    </aside>
+    </>
+  );
+}
+
+export function AdminSidebar({ activeSection, onSectionChange, collapsed, onToggleCollapsed, mobileOpen, onClose }: AdminSidebarProps) {
+  return (
+    <>
+      {/* Mobile overlay drawer */}
+      <div className={`fixed inset-0 z-50 md:hidden ${mobileOpen ? "block" : "hidden"}`}>
+        <div className="absolute inset-0 bg-black/50" onClick={onClose} />
+        <aside
+          className="absolute left-0 top-0 h-full w-[220px] flex flex-col"
+          style={{ backgroundColor: "var(--ce-bg-admin-sidebar)" }}
+        >
+          <div className="flex items-center justify-between px-4 py-5 border-b" style={{ borderColor: "rgba(255,199,44,0.15)" }}>
+            <Logo variant="white" size="sm" />
+            <button onClick={onClose} className="p-1.5 rounded-lg" style={{ color: "rgba(255,248,231,0.6)" }}>
+              <X size={16} />
+            </button>
+          </div>
+          <NavContent activeSection={activeSection} onSectionChange={onSectionChange} collapsed={false} onClose={onClose} />
+        </aside>
+      </div>
+
+      {/* Desktop sidebar */}
+      <aside
+        className="hidden md:flex flex-col"
+        style={{ width: collapsed ? "64px" : "220px", backgroundColor: "var(--ce-bg-admin-sidebar)", transition: "width 0.25s ease", flexShrink: 0 }}
+      >
+        <div className="flex items-center justify-between px-4 py-5 border-b" style={{ borderColor: "rgba(255,199,44,0.15)" }}>
+          {!collapsed && <Logo variant="white" size="sm" />}
+          <button
+            onClick={onToggleCollapsed}
+            className="p-1.5 rounded-lg transition-colors flex-shrink-0"
+            style={{ color: "rgba(255,248,231,0.6)" }}
+          >
+            <ChevronRight size={16} style={{ transform: collapsed ? "rotate(0)" : "rotate(180deg)", transition: "transform 0.25s" }} />
+          </button>
+        </div>
+        <NavContent activeSection={activeSection} onSectionChange={onSectionChange} collapsed={collapsed} />
+      </aside>
+    </>
   );
 }

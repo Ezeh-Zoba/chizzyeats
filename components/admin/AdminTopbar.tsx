@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { Bell, Plus } from "lucide-react";
+import { Bell, Menu, Plus } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,21 +22,35 @@ interface AdminTopbarProps {
   activeSection: string;
   onCreateRecipe: () => void;
   notifications: AdminNotification[];
+  onMenuClick?: () => void;
 }
 
-export function AdminTopbar({ activeSection, onCreateRecipe, notifications }: AdminTopbarProps) {
+export function AdminTopbar({ activeSection, onCreateRecipe, notifications, onMenuClick }: AdminTopbarProps) {
   return (
     <header
-      className="flex items-center justify-between px-6 py-4 flex-shrink-0"
+      className="flex items-center justify-between px-3 sm:px-6 py-3 sm:py-4 flex-shrink-0"
       style={{ backgroundColor: "var(--ce-bg-card)", borderBottom: "1px solid var(--ce-border)", boxShadow: "0 1px 8px var(--ce-shadow)" }}
     >
-      <div>
-        <h1 style={{ fontFamily: "'Dancing Script', cursive", fontSize: "20px", color: "var(--ce-text)", fontWeight: 700 }}>
-          {ADMIN_SIDEBAR_NAV.find((n) => n.id === activeSection)?.label || "Dashboard"}
-        </h1>
-        <p className="text-xs" style={{ color: "var(--ce-text-muted)" }}>Welcome back, Chizzy 👋</p>
-      </div>
       <div className="flex items-center gap-3">
+        {/* Hamburger — mobile only */}
+        <button
+          onClick={onMenuClick}
+          className="md:hidden p-2 rounded-xl"
+          style={{ color: "var(--ce-text-muted)", backgroundColor: "var(--ce-bg-surface)" }}
+          aria-label="Open menu"
+        >
+          <Menu size={18} />
+        </button>
+
+        <div>
+          <h1 className="truncate text-base md:text-lg" style={{ fontFamily: "'Dancing Script', cursive", color: "var(--ce-text)", fontWeight: 700 }}>
+            {ADMIN_SIDEBAR_NAV.find((n) => n.id === activeSection)?.label || "Dashboard"}
+          </h1>
+          <p className="text-xs hidden sm:block" style={{ color: "var(--ce-text-muted)" }}>Welcome back, Chizzy 👋</p>
+        </div>
+      </div>
+
+      <div className="flex items-center gap-2 sm:gap-3">
         <button
           onClick={onCreateRecipe}
           className="hidden sm:flex items-center gap-1.5 px-4 py-2 rounded-full text-sm"
@@ -51,7 +65,7 @@ export function AdminTopbar({ activeSection, onCreateRecipe, notifications }: Ad
               <Bell size={16} style={{ color: "#FF8C42" }} />
             </button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-72">
+          <DropdownMenuContent align="end" style={{ width: "min(18rem, 90vw)" }}>
             <DropdownMenuLabel>Notifications</DropdownMenuLabel>
             <DropdownMenuSeparator />
             {notifications.length === 0 ? (
@@ -69,7 +83,7 @@ export function AdminTopbar({ activeSection, onCreateRecipe, notifications }: Ad
           </DropdownMenuContent>
         </DropdownMenu>
 
-        <div className="relative w-9 h-9 rounded-full overflow-hidden">
+        <div className="relative w-9 h-9 rounded-full overflow-hidden flex-shrink-0">
           <Image
             src="https://images.unsplash.com/photo-1636647511729-6703539ba71f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=100"
             alt="Admin"

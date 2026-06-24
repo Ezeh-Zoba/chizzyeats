@@ -51,7 +51,7 @@ export function CategoriesSection({ categories, onAdd, onEdit, onDelete }: Categ
         {/* Add category form */}
         <div className="p-5 rounded-2xl h-fit" style={{ backgroundColor: "var(--ce-bg-card)", boxShadow: "0 2px 12px var(--ce-shadow)" }}>
           <h3 className="text-sm font-bold mb-4" style={{ color: "var(--ce-text)" }}>Add New Category</h3>
-          <div className="flex gap-3">
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
             <input
               value={newCat}
               onChange={(e) => setNewCat(e.target.value)}
@@ -82,7 +82,7 @@ export function CategoriesSection({ categories, onAdd, onEdit, onDelete }: Categ
                     value={editingName}
                     onChange={(e) => setEditingName(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && saveEdit()}
-                    className="text-sm px-2 py-1 rounded-lg outline-none flex-1 max-w-[200px]"
+                    className="text-sm px-2 py-1 rounded-lg outline-none flex-1 max-w-full sm:max-w-[200px]"
                     style={{ border: "1.5px solid #FFC72C", color: "var(--ce-text)" }}
                   />
                 ) : (

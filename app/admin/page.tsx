@@ -58,6 +58,7 @@ interface AdminNotification {
 export default function AdminDashboard() {
   const [activeSection, setActiveSection] = useState("overview");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [categories, setCategories] = useState<AdminCategory[]>([]);
   const [commentCount, setCommentCount] = useState(0);
@@ -330,14 +331,16 @@ export default function AdminDashboard() {
     <div className="flex h-screen overflow-hidden" style={{ fontFamily: "'Inter', sans-serif", backgroundColor: "var(--ce-bg-admin)" }}>
       <AdminSidebar
         activeSection={activeSection}
-        onSectionChange={setActiveSection}
+        onSectionChange={(id) => { setActiveSection(id); setMobileNavOpen(false); }}
         collapsed={sidebarCollapsed}
         onToggleCollapsed={() => setSidebarCollapsed(!sidebarCollapsed)}
+        mobileOpen={mobileNavOpen}
+        onClose={() => setMobileNavOpen(false)}
       />
 
       <div className="flex-1 flex flex-col overflow-hidden">
-        <AdminTopbar activeSection={activeSection} onCreateRecipe={() => setActiveSection("create")} notifications={notifications} />
-        <main className="flex-1 overflow-y-auto p-6">
+        <AdminTopbar activeSection={activeSection} onCreateRecipe={() => setActiveSection("create")} notifications={notifications} onMenuClick={() => setMobileNavOpen(true)} />
+        <main className="flex-1 overflow-y-auto p-3 sm:p-6">
           {loading ? (
             <p className="text-sm" style={{ color: "var(--ce-text-muted)" }}>Loading…</p>
           ) : loadError ? (

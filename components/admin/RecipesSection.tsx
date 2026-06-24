@@ -33,7 +33,7 @@ export function RecipesSection({ recipes, categories, onUpdateRecipe, onDeleteRe
   return (
     <div className="space-y-5">
       <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
-        <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl flex-1 max-w-sm" style={{ backgroundColor: "var(--ce-bg-card)", border: "1.5px solid var(--ce-border)" }}>
+        <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl flex-1 max-w-full sm:max-w-sm" style={{ backgroundColor: "var(--ce-bg-card)", border: "1.5px solid var(--ce-border)" }}>
           <Search size={15} style={{ color: "var(--ce-text-muted)" }} />
           <input
             value={search}
@@ -58,7 +58,7 @@ export function RecipesSection({ recipes, categories, onUpdateRecipe, onDeleteRe
 
       <div className="rounded-2xl overflow-hidden" style={{ backgroundColor: "var(--ce-bg-card)", boxShadow: "0 2px 12px var(--ce-shadow)" }}>
         <div className="overflow-x-auto">
-          <table className="w-full">
+          <table className="w-full min-w-[640px]">
             <thead>
               <tr style={{ backgroundColor: "var(--ce-bg-surface)" }}>
                 {["Recipe", "Category", "Time", "Status", "Saves", "Actions"].map((h) => (

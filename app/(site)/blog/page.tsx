@@ -55,7 +55,7 @@ export default function BlogPage() {
       {featuredPost && (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-12">
           <Link href={`/blog/${featuredPost.slug}`} className="group block" style={{ textDecoration: "none" }}>
-            <div className="relative rounded-3xl overflow-hidden" style={{ aspectRatio: "21/9" }}>
+            <div className="relative rounded-3xl overflow-hidden aspect-[3/2] sm:aspect-[16/9] lg:aspect-[21/9]">
               {featuredPost.coverImage ? (
                 <Image
                   src={featuredPost.coverImage}

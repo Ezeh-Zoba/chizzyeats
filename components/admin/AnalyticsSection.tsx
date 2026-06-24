@@ -31,7 +31,7 @@ export function AnalyticsSection({ recipes, categories, commentCount, subscriber
     <div className="space-y-6">
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {summaryCards.map(({ label, value, icon: Icon, color }) => (
-          <div key={label} className="p-5 rounded-2xl" style={{ backgroundColor: "var(--ce-bg-card)", boxShadow: "0 2px 12px var(--ce-shadow)" }}>
+          <div key={label} className="p-3 sm:p-5 rounded-2xl" style={{ backgroundColor: "var(--ce-bg-card)", boxShadow: "0 2px 12px var(--ce-shadow)" }}>
             <div className="w-9 h-9 rounded-xl flex items-center justify-center mb-3" style={{ backgroundColor: `${color}20` }}>
               <Icon size={16} style={{ color }} />
             </div>
@@ -41,7 +41,7 @@ export function AnalyticsSection({ recipes, categories, commentCount, subscriber
         ))}
       </div>
 
-      <div className="p-5 rounded-2xl" style={{ backgroundColor: "var(--ce-bg-card)", boxShadow: "0 2px 12px var(--ce-shadow)" }}>
+      <div className="p-3 sm:p-5 rounded-2xl" style={{ backgroundColor: "var(--ce-bg-card)", boxShadow: "0 2px 12px var(--ce-shadow)" }}>
         <h3 className="text-sm font-bold mb-4" style={{ color: "var(--ce-text)" }}>Recipes by Category</h3>
         <ResponsiveContainer width="100%" height={240}>
           <BarChart data={categoryChartData} margin={{ left: 0 }}>
@@ -53,7 +53,7 @@ export function AnalyticsSection({ recipes, categories, commentCount, subscriber
         </ResponsiveContainer>
       </div>
 
-      <div className="p-5 rounded-2xl" style={{ backgroundColor: "var(--ce-bg-card)", boxShadow: "0 2px 12px var(--ce-shadow)" }}>
+      <div className="p-3 sm:p-5 rounded-2xl" style={{ backgroundColor: "var(--ce-bg-card)", boxShadow: "0 2px 12px var(--ce-shadow)" }}>
         <h3 className="text-sm font-bold mb-4" style={{ color: "var(--ce-text)" }}>Top Performing Recipes</h3>
         <div className="space-y-3">
           {topRecipes.map((r, i) => (

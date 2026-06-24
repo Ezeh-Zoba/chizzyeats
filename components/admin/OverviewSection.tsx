@@ -64,11 +64,11 @@ export function OverviewSection({ recipes, categories, commentCount, subscriberC
           <h3 style={{ color: "var(--ce-text)", fontWeight: 700, fontSize: "15px" }}>Recent Recipes</h3>
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full">
+          <table className="w-full min-w-[560px]">
             <thead>
               <tr style={{ backgroundColor: "var(--ce-bg-surface)" }}>
                 {["Recipe", "Category", "Difficulty", "Saves", "Status", ""].map((h) => (
-                  <th key={h} className="px-5 py-3 text-left text-xs uppercase tracking-wider" style={{ color: "var(--ce-text-muted)", fontWeight: 600 }}>
+                  <th key={h} className="px-3 sm:px-5 py-2.5 sm:py-3 text-left text-xs uppercase tracking-wider" style={{ color: "var(--ce-text-muted)", fontWeight: 600 }}>
                     {h}
                   </th>
                 ))}
@@ -77,7 +77,7 @@ export function OverviewSection({ recipes, categories, commentCount, subscriberC
             <tbody>
               {recipes.slice(0, 8).map((r) => (
                 <tr key={r.id} className="border-t" style={{ borderColor: "var(--ce-border)" }}>
-                  <td className="px-5 py-3">
+                  <td className="px-3 sm:px-5 py-2.5 sm:py-3">
                     <div className="flex items-center gap-3">
                       <div className="relative w-10 h-10 rounded-xl overflow-hidden flex-shrink-0">
                         <Image src={r.image} alt={r.title} fill sizes="40px" className="object-cover" />
@@ -85,14 +85,14 @@ export function OverviewSection({ recipes, categories, commentCount, subscriberC
                       <span className="text-sm font-medium" style={{ color: "var(--ce-text)" }}>{r.title}</span>
                     </div>
                   </td>
-                  <td className="px-5 py-3">
+                  <td className="px-3 sm:px-5 py-2.5 sm:py-3">
                     <span className="text-xs px-2 py-0.5 rounded-full" style={{ backgroundColor: "var(--ce-bg-surface)", color: "#FF8C42", fontWeight: 600 }}>
                       {r.category}
                     </span>
                   </td>
                   <td className="px-5 py-3 text-sm" style={{ color: "var(--ce-text-muted)" }}>{r.difficulty}</td>
                   <td className="px-5 py-3 text-sm" style={{ color: "var(--ce-text)", fontWeight: 600 }}>{r.saves?.toLocaleString()}</td>
-                  <td className="px-5 py-3">
+                  <td className="px-3 sm:px-5 py-2.5 sm:py-3">
                     <span
                       className="text-xs px-2 py-0.5 rounded-full"
                       style={{
@@ -104,7 +104,7 @@ export function OverviewSection({ recipes, categories, commentCount, subscriberC
                       {r.status === "draft" ? "Draft" : "Published"}
                     </span>
                   </td>
-                  <td className="px-5 py-3">
+                  <td className="px-3 sm:px-5 py-2.5 sm:py-3">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <button className="p-1.5 rounded-lg" style={{ color: "var(--ce-text-muted)" }}>
