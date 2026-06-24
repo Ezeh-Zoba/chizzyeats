@@ -177,7 +177,7 @@ export function RecipeSidebar({ recipe, relatedRecipes, onRatingChange }: Recipe
         <div className="p-4 rounded-2xl" style={{ backgroundColor: "var(--ce-bg-card)", boxShadow: "0 2px 12px var(--ce-shadow)" }}>
           <div className="relative w-14 h-14 rounded-full overflow-hidden mx-auto mb-3">
             <Image
-              src="https://images.unsplash.com/photo-1636647511729-6703539ba71f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=200"
+              src="/images/About.png"
               alt={recipe.author || "Chizzy"}
               fill
               sizes="56px"

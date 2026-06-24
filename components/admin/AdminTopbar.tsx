@@ -85,7 +85,7 @@ export function AdminTopbar({ activeSection, onCreateRecipe, notifications, onMe
 
         <div className="relative w-9 h-9 rounded-full overflow-hidden flex-shrink-0">
           <Image
-            src="https://images.unsplash.com/photo-1636647511729-6703539ba71f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=100"
+            src="/images/About.png"
             alt="Admin"
             fill
             sizes="36px"

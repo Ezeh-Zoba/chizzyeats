@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { doc, getDoc, deleteDoc, setDoc, updateDoc, increment } from "firebase/firestore";
+import { collection, doc, getDoc, getCountFromServer, deleteDoc, setDoc, updateDoc, increment, query, where } from "firebase/firestore";
 import { Clock, Users, ChefHat } from "lucide-react";
 import { db } from "@/lib/firebase/client";
 import { useAuthUser } from "@/hooks/useAuthUser";
@@ -49,12 +49,15 @@ export default function RecipeDetailPage() {
 
   useEffect(() => {
     let active = true;
-    getDoc(doc(db, "recipes", params.id))
-      .then((snap) => {
-        if (!active || !snap.exists()) return;
-        const data = { id: snap.id, ...snap.data() } as Recipe;
+    Promise.all([
+      getDoc(doc(db, "recipes", params.id)),
+      getCountFromServer(query(collection(db, "saves"), where("recipeId", "==", params.id))),
+    ])
+      .then(([recipeSnap, savesSnap]) => {
+        if (!active || !recipeSnap.exists()) return;
+        const data = { id: recipeSnap.id, ...recipeSnap.data() } as Recipe;
         setRecipe(data);
-        setSavesCount(data.saves ?? 0);
+        setSavesCount(savesSnap.data().count);
         setRatingValue(data.rating ?? 0);
         setServings(data.servings || 4);
       })

@@ -76,11 +76,22 @@ export default function AdminDashboard() {
     let active = true;
     setLoadError(null);
 
-    // Real-time listener for recipes so saves/rating changes on the public
-    // site are reflected immediately in the admin table without a page reload.
-    const unsubRecipes = onSnapshot(collection(db, "recipes"), (snap) => {
+    // Real-time listener for recipes so rating/status changes on the public
+    // site are reflected immediately. Saves are counted from the saves
+    // collection (source of truth) rather than the denormalized field which
+    // may have been seeded with mock values.
+    const unsubRecipes = onSnapshot(collection(db, "recipes"), async (snap) => {
       if (!active) return;
-      setRecipes(snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Recipe));
+      const base = snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Recipe);
+      const counts = await Promise.all(
+        base.map((r) =>
+          getCountFromServer(query(collection(db, "saves"), where("recipeId", "==", r.id)))
+            .then((s) => ({ id: r.id, count: s.data().count }))
+        )
+      );
+      if (!active) return;
+      const countMap = Object.fromEntries(counts.map(({ id, count }) => [id, count]));
+      setRecipes(base.map((r) => ({ ...r, saves: countMap[r.id] ?? r.saves })));
     });
 
     async function load() {
