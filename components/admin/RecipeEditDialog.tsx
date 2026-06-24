@@ -262,6 +262,43 @@ export function RecipeEditDialog({ recipe, categories, onOpenChange, onSave }: R
               <Plus size={14} /> Add Note
             </button>
           </div>
+
+          <div>
+            <label className="block text-sm mb-1.5" style={labelStyle}>Gallery Images (URLs)</label>
+            <div className="space-y-2">
+              {(form.galleryImages ?? []).map((url, i) => (
+                <div key={i} className="flex gap-2">
+                  <input
+                    value={url}
+                    onChange={(e) => {
+                      const next = [...(form.galleryImages ?? [])];
+                      next[i] = e.target.value;
+                      setForm({ ...form, galleryImages: next });
+                    }}
+                    placeholder="https://..."
+                    className="flex-1 px-3 py-2 rounded-xl outline-none text-sm"
+                    style={inputStyle}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setForm({ ...form, galleryImages: (form.galleryImages ?? []).filter((_, j) => j !== i) })}
+                    className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
+                    style={{ backgroundColor: "var(--ce-bg-surface)", color: "var(--ce-text-muted)" }}
+                  >
+                    <X size={14} />
+                  </button>
+                </div>
+              ))}
+            </div>
+            <button
+              type="button"
+              onClick={() => setForm({ ...form, galleryImages: [...(form.galleryImages ?? []), ""] })}
+              className="mt-2 flex items-center gap-1.5 text-sm"
+              style={{ color: "#FF8C42", fontWeight: 600 }}
+            >
+              <Plus size={14} /> Add Gallery Image URL
+            </button>
+          </div>
         </div>
 
         <DialogFooter>

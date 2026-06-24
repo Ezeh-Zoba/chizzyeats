@@ -41,6 +41,7 @@ export default function RecipeDetailPage() {
   const [checked, setChecked] = useState<Set<number>>(new Set());
   const [saved, setSaved] = useState(false);
   const [savesCount, setSavesCount] = useState(0);
+  const [ratingValue, setRatingValue] = useState(0);
   const [signInOpen, setSignInOpen] = useState(false);
   const [activeGallery, setActiveGallery] = useState(0);
   const [servings, setServings] = useState(4);
@@ -54,6 +55,7 @@ export default function RecipeDetailPage() {
         const data = { id: snap.id, ...snap.data() } as Recipe;
         setRecipe(data);
         setSavesCount(data.saves ?? 0);
+        setRatingValue(data.rating ?? 0);
         setServings(data.servings || 4);
       })
       .finally(() => active && setLoading(false));
@@ -117,7 +119,7 @@ export default function RecipeDetailPage() {
 
   const relatedRecipes = allRecipes.filter((r) => r.id !== recipe.id && r.categorySlug === recipe.categorySlug).slice(0, 3);
   const galleryImages = recipe.galleryImages?.length ? recipe.galleryImages : [recipe.image];
-  const recipeWithLiveSaves = { ...recipe, saves: savesCount };
+  const recipeWithLiveSaves = { ...recipe, saves: savesCount, rating: ratingValue };
 
   return (
     <div style={{ fontFamily: "'Inter', sans-serif", backgroundColor: "var(--ce-bg)", minHeight: "100vh" }}>
@@ -146,22 +148,23 @@ export default function RecipeDetailPage() {
       />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+        {/* Stats bar — full width, above the two-column layout */}
+        <div className="grid grid-cols-3 sm:grid-cols-5 gap-3 my-8 p-4 rounded-2xl" style={{ backgroundColor: "var(--ce-bg-surface)" }}>
+          {[
+            { icon: Clock, label: "Total Time", value: recipe.time },
+            { icon: Users, label: "Servings", value: `${servings}` },
+            { icon: ChefHat, label: "Difficulty", value: recipe.difficulty },
+          ].map(({ icon: Icon, label, value }) => (
+            <div key={label} className="flex flex-col items-center text-center gap-1">
+              <Icon size={16} style={{ color: "#FF8C42" }} />
+              <span className="text-xs" style={{ color: "var(--ce-text-muted)" }}>{label}</span>
+              <span className="text-sm" style={{ color: "var(--ce-text)", fontWeight: 700 }}>{value}</span>
+            </div>
+          ))}
+        </div>
+
         <div className="flex flex-col lg:flex-row gap-8">
           <div className="flex-1 min-w-0">
-            <div className="grid grid-cols-3 sm:grid-cols-5 gap-3 mb-8 p-4 rounded-2xl" style={{ backgroundColor: "var(--ce-bg-surface)" }}>
-              {[
-                { icon: Clock, label: "Total Time", value: recipe.time },
-                { icon: Users, label: "Servings", value: `${servings}` },
-                { icon: ChefHat, label: "Difficulty", value: recipe.difficulty },
-              ].map(({ icon: Icon, label, value }) => (
-                <div key={label} className="flex flex-col items-center text-center gap-1">
-                  <Icon size={16} style={{ color: "#FF8C42" }} />
-                  <span className="text-xs" style={{ color: "var(--ce-text-muted)" }}>{label}</span>
-                  <span className="text-sm" style={{ color: "var(--ce-text)", fontWeight: 700 }}>{value}</span>
-                </div>
-              ))}
-            </div>
-
             <p className="mb-8 leading-relaxed text-base" style={{ color: "var(--ce-text)" }}>
               {recipe.excerpt} This recipe has been tested and perfected in Chizzy's own kitchen — follow the steps below for a reliable, flavour-packed result every time.
             </p>
@@ -196,8 +199,12 @@ export default function RecipeDetailPage() {
             </div>
           </div>
 
-          <div className="print:hidden">
-            <RecipeSidebar recipe={recipeWithLiveSaves} />
+          <div className="print:hidden lg:w-72 lg:flex-shrink-0">
+            <RecipeSidebar
+              recipe={recipeWithLiveSaves}
+              relatedRecipes={relatedRecipes}
+              onRatingChange={setRatingValue}
+            />
           </div>
         </div>
       </div>

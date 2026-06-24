@@ -55,6 +55,7 @@ export interface CreateRecipeFormData {
   steps: RecipeFormStep[];
   notes: string[];
   videoUrl: string;
+  galleryImageUrls: string[];
 }
 
 export const EMPTY_RECIPE_FORM: CreateRecipeFormData = {
@@ -64,4 +65,5 @@ export const EMPTY_RECIPE_FORM: CreateRecipeFormData = {
   steps: [{ title: "", time: "", desc: "" }],
   notes: [],
   videoUrl: "",
+  galleryImageUrls: [],
 };

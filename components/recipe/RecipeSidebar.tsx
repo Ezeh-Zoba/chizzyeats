@@ -3,8 +3,8 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { doc, getDoc, setDoc } from "firebase/firestore";
-import { Download, Printer, Share2, Instagram, Facebook, Twitter, Copy, Star } from "lucide-react";
+import { doc, getDoc, setDoc, runTransaction } from "firebase/firestore";
+import { Download, Printer, Share2, Instagram, Facebook, Twitter, Copy, Star, Clock } from "lucide-react";
 import type { Recipe } from "@/components/RecipeCard";
 import { db } from "@/lib/firebase/client";
 import { useAuthUser } from "@/hooks/useAuthUser";
@@ -13,9 +13,11 @@ import { RatingDialog } from "@/components/recipe/RatingDialog";
 
 interface RecipeSidebarProps {
   recipe: Recipe;
+  relatedRecipes?: Recipe[];
+  onRatingChange?: (newAvg: number) => void;
 }
 
-export function RecipeSidebar({ recipe }: RecipeSidebarProps) {
+export function RecipeSidebar({ recipe, relatedRecipes, onRatingChange }: RecipeSidebarProps) {
   const { user } = useAuthUser();
   const [copied, setCopied] = useState(false);
   const [rateOpen, setRateOpen] = useState(false);
@@ -43,6 +45,12 @@ export function RecipeSidebar({ recipe }: RecipeSidebarProps) {
 
   const shareButtons = [
     {
+      icon: Instagram,
+      label: copied ? "Copied!" : "Instagram",
+      bg: "#E1306C",
+      onClick: handleCopy,
+    },
+    {
       icon: Facebook,
       label: "Facebook",
       bg: "#1877F2",
@@ -55,12 +63,6 @@ export function RecipeSidebar({ recipe }: RecipeSidebarProps) {
       onClick: () => openShareWindow(`https://twitter.com/intent/tweet?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(recipe.title)}`),
     },
     {
-      icon: Instagram,
-      label: copied ? "Copied!" : "Instagram",
-      bg: "#E1306C",
-      onClick: handleCopy,
-    },
-    {
       icon: Copy,
       label: copied ? "Copied!" : "Copy Link",
       bg: "#8B6F47",
@@ -68,8 +70,36 @@ export function RecipeSidebar({ recipe }: RecipeSidebarProps) {
     },
   ];
 
+  const handleRatingSubmit = async (rating: number) => {
+    if (!user) return;
+    await setDoc(doc(db, "ratings", `${user.uid}_${recipe.id}`), {
+      userId: user.uid,
+      recipeId: recipe.id,
+      value: rating,
+      createdAt: new Date(),
+    });
+
+    const recipeRef = doc(db, "recipes", recipe.id);
+    let newAvg = rating;
+    await runTransaction(db, async (tx) => {
+      const snap = await tx.get(recipeRef);
+      const data = snap.data() ?? {};
+      const oldSum: number = data.ratingSum ?? 0;
+      const oldCount: number = data.ratingCount ?? 0;
+      const prevRating = userRating ?? null;
+      const newCount = prevRating !== null ? oldCount : oldCount + 1;
+      const newSum = oldSum - (prevRating ?? 0) + rating;
+      newAvg = newCount > 0 ? Math.round((newSum / newCount) * 10) / 10 : rating;
+      tx.update(recipeRef, { ratingSum: newSum, ratingCount: newCount, rating: newAvg });
+    });
+
+    setUserRating(rating);
+    onRatingChange?.(newAvg);
+    setTimeout(() => setRateOpen(false), 1200);
+  };
+
   return (
-    <div className="lg:w-72 flex-shrink-0">
+    <div className="w-full">
       <div className="sticky top-24 space-y-4">
         <button
           onClick={() => window.print()}
@@ -124,15 +154,15 @@ export function RecipeSidebar({ recipe }: RecipeSidebarProps) {
 
         <div className="p-4 rounded-2xl text-center" style={{ backgroundColor: "var(--ce-bg)", border: "1.5px solid var(--ce-overlay-gold-border)" }}>
           <div style={{ fontFamily: "'Dancing Script', cursive", fontSize: "36px", color: "var(--ce-text)", fontWeight: 800 }}>
-            {userRating ?? recipe.rating}
+            {userRating ?? recipe.rating ?? 0}
           </div>
           <div className="flex justify-center gap-0.5 mb-1">
             {[1, 2, 3, 4, 5].map((s) => (
-              <Star key={s} size={14} fill={s <= Math.round(userRating ?? recipe.rating ?? 5) ? "#FFC72C" : "none"} style={{ color: "#FFC72C" }} />
+              <Star key={s} size={14} fill={s <= Math.round(userRating ?? recipe.rating ?? 0) ? "#FFC72C" : "none"} style={{ color: "#FFC72C" }} />
             ))}
           </div>
           <p className="text-xs" style={{ color: "var(--ce-text-muted)" }}>
-            {userRating ? "Thanks for your rating!" : `${recipe.saves?.toLocaleString()} people saved this`}
+            {userRating ? "Thanks for your rating!" : `${recipe.saves?.toLocaleString() ?? 0} people saved this`}
           </p>
           <button
             onClick={() => (user ? setRateOpen(true) : setSignInOpen(true))}
@@ -143,18 +173,19 @@ export function RecipeSidebar({ recipe }: RecipeSidebarProps) {
           </button>
         </div>
 
+        {/* About Author */}
         <div className="p-4 rounded-2xl" style={{ backgroundColor: "var(--ce-bg-card)", boxShadow: "0 2px 12px var(--ce-shadow)" }}>
           <div className="relative w-14 h-14 rounded-full overflow-hidden mx-auto mb-3">
             <Image
               src="https://images.unsplash.com/photo-1636647511729-6703539ba71f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=200"
-              alt="Chizzy"
+              alt={recipe.author || "Chizzy"}
               fill
               sizes="56px"
               className="object-cover"
             />
           </div>
           <h4 className="text-sm text-center mb-1" style={{ color: "var(--ce-text)", fontFamily: "'Dancing Script', cursive", fontWeight: 700 }}>
-            Chizzy
+            {recipe.author || "Chizzy"}
           </h4>
           <p className="text-xs text-center mb-3" style={{ color: "var(--ce-text-muted)" }}>
             Nigerian food lover, recipe developer, and your guide to flavourful cooking.
@@ -167,23 +198,41 @@ export function RecipeSidebar({ recipe }: RecipeSidebarProps) {
             View Profile
           </Link>
         </div>
+
+        {/* More Recipes */}
+        {relatedRecipes && relatedRecipes.length > 0 && (
+          <div className="p-4 rounded-2xl" style={{ backgroundColor: "var(--ce-bg-card)", boxShadow: "0 2px 12px var(--ce-shadow)" }}>
+            <h4 className="text-sm mb-3" style={{ color: "var(--ce-text)", fontWeight: 700 }}>More Recipes</h4>
+            <div className="space-y-3">
+              {relatedRecipes.slice(0, 4).map((r) => (
+                <Link key={r.id} href={`/recipe/${r.id}`} className="flex items-center gap-3 group">
+                  <div className="relative w-12 h-12 rounded-xl overflow-hidden flex-shrink-0">
+                    <Image src={r.image} alt={r.title} fill sizes="48px" className="object-cover group-hover:scale-105 transition-transform duration-200" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <span
+                      className="inline-block text-xs px-2 py-0.5 rounded-full mb-0.5"
+                      style={{ backgroundColor: "var(--ce-bg-surface)", color: "#FF8C42", fontWeight: 600 }}
+                    >
+                      {r.category}
+                    </span>
+                    <p className="text-xs font-semibold truncate" style={{ color: "var(--ce-text)" }}>{r.title}</p>
+                    <p className="text-xs flex items-center gap-1 mt-0.5" style={{ color: "var(--ce-text-muted)" }}>
+                      <Clock size={10} /> {r.time}
+                    </p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       <RatingDialog
         open={rateOpen}
         onOpenChange={setRateOpen}
         recipeTitle={recipe.title}
-        onSubmit={async (rating) => {
-          if (!user) return;
-          await setDoc(doc(db, "ratings", `${user.uid}_${recipe.id}`), {
-            userId: user.uid,
-            recipeId: recipe.id,
-            value: rating,
-            createdAt: new Date(),
-          });
-          setUserRating(rating);
-          setTimeout(() => setRateOpen(false), 1200);
-        }}
+        onSubmit={handleRatingSubmit}
       />
 
       <SignInModal open={signInOpen} onOpenChange={setSignInOpen} />

@@ -145,19 +145,23 @@ export default function AdminDashboard() {
     count: uniqueRecipes.filter((r) => r.categorySlug === c.slug).length,
   }));
 
-  const createRecipe = async (recipe: Recipe, publish: boolean, imageFile: File | null) => {
+  const createRecipe = async (recipe: Recipe, publish: boolean, imageFile: File | null, galleryFiles: File[] = []) => {
     const heroImageUrl = imageFile ? await uploadRecipeImage(imageFile, recipe.id) : recipe.image;
+    const galleryUrls = await Promise.all(
+      galleryFiles.map((file, i) => uploadRecipeImage(file, `${recipe.id}-gallery-${i}`))
+    );
     const now = new Date();
     const docData = {
       ...recipe,
       image: heroImageUrl,
+      galleryImages: galleryUrls.length > 0 ? galleryUrls : undefined,
       status: publish ? "published" : "draft",
       createdAt: now,
       updatedAt: now,
       publishedAt: publish ? now : null,
     };
     await setDoc(doc(db, "recipes", recipe.id), docData);
-    setRecipes((prev) => [{ ...recipe, image: heroImageUrl, status: docData.status as Recipe["status"] }, ...prev.filter((r) => r.id !== recipe.id)]);
+    setRecipes((prev) => [{ ...recipe, image: heroImageUrl, galleryImages: galleryUrls, status: docData.status as Recipe["status"] }, ...prev.filter((r) => r.id !== recipe.id)]);
   };
 
   const updateRecipe = async (updated: Recipe) => {

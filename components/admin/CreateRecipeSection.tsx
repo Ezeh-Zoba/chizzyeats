@@ -15,7 +15,7 @@ interface CreateRecipeSectionProps {
   formData: CreateRecipeFormData;
   setFormData: (data: CreateRecipeFormData) => void;
   categories: AdminCategory[];
-  onCreate: (recipe: Recipe, publish: boolean, imageFile: File | null) => void;
+  onCreate: (recipe: Recipe, publish: boolean, imageFile: File | null, galleryFiles: File[]) => void;
 }
 
 export function CreateRecipeSection({ formData, setFormData, categories, onCreate }: CreateRecipeSectionProps) {
@@ -23,6 +23,8 @@ export function CreateRecipeSection({ formData, setFormData, categories, onCreat
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [dragOver, setDragOver] = useState(false);
   const [saved, setSaved] = useState<"draft" | "published" | null>(null);
+  const [galleryFiles, setGalleryFiles] = useState<File[]>([]);
+  const [galleryPreviews, setGalleryPreviews] = useState<string[]>([]);
 
   const pickImage = (file: File) => {
     setImageFile(file);
@@ -50,16 +52,21 @@ export function CreateRecipeSection({ formData, setFormData, categories, onCreat
     rating: 0,
     saves: 0,
     servings: Number(formData.servings) || 4,
-  });
+    galleryImages: galleryPreviews,
+    ratingCount: 0,
+    ratingSum: 0,
+  } as Recipe);
 
   const handleSubmit = (e: React.SyntheticEvent, publish: boolean) => {
     e.preventDefault();
     if (!formData.title) return;
-    onCreate(buildRecipe(), publish, imageFile);
+    onCreate(buildRecipe(), publish, imageFile, galleryFiles);
     setSaved(publish ? "published" : "draft");
     setFormData(EMPTY_RECIPE_FORM);
     setImagePreview(null);
     setImageFile(null);
+    setGalleryFiles([]);
+    setGalleryPreviews([]);
     setTimeout(() => setSaved(null), 2500);
   };
 
@@ -266,6 +273,50 @@ export function CreateRecipeSection({ formData, setFormData, categories, onCreat
             <h3 className="text-sm font-bold" style={{ color: "var(--ce-text)" }}>Video Tutorial</h3>
             <input value={formData.videoUrl} onChange={(e) => setFormData({ ...formData, videoUrl: e.target.value })}
               placeholder="https://youtube.com/watch?v=..." className="w-full px-4 py-3 rounded-2xl outline-none text-sm" style={inputStyle} />
+          </div>
+
+          {/* Gallery Images */}
+          <div className="p-5 rounded-2xl space-y-3" style={sectionStyle}>
+            <h3 className="text-sm font-bold" style={{ color: "var(--ce-text)" }}>Photo Gallery</h3>
+            <p className="text-xs" style={{ color: "var(--ce-text-muted)" }}>Add extra images to showcase ingredients, steps, and plating.</p>
+            {galleryPreviews.length > 0 && (
+              <div className="grid grid-cols-3 gap-2">
+                {galleryPreviews.map((src, i) => (
+                  <div key={i} className="relative aspect-square rounded-xl overflow-hidden">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={src} alt={`Gallery ${i + 1}`} className="w-full h-full object-cover" />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setGalleryPreviews((p) => p.filter((_, j) => j !== i));
+                        setGalleryFiles((f) => f.filter((_, j) => j !== i));
+                      }}
+                      className="absolute top-1 right-1 w-6 h-6 rounded-full flex items-center justify-center"
+                      style={{ backgroundColor: "rgba(0,0,0,0.65)", color: "#fff" }}
+                    >
+                      <X size={11} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+            <label className="flex items-center gap-2 cursor-pointer text-sm" style={{ color: "#FF8C42", fontWeight: 600 }}>
+              <Plus size={14} /> Add Gallery Photos
+              <input
+                type="file"
+                accept="image/*"
+                multiple
+                className="hidden"
+                onChange={(e) => {
+                  const files = Array.from(e.target.files ?? []);
+                  files.forEach((file) => {
+                    setGalleryFiles((prev) => [...prev, file]);
+                    setGalleryPreviews((prev) => [...prev, URL.createObjectURL(file)]);
+                  });
+                  e.target.value = "";
+                }}
+              />
+            </label>
           </div>
 
           {/* Publish / Draft */}
