@@ -161,8 +161,10 @@ export default function AdminDashboard() {
   };
 
   const updateRecipe = async (updated: Recipe) => {
-    await updateDoc(doc(db, "recipes", updated.id), { ...updated, updatedAt: new Date() });
-    setRecipes((prev) => prev.map((r) => (r.id === updated.id ? updated : r)));
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { saves, ...fields } = updated;
+    await updateDoc(doc(db, "recipes", updated.id), { ...fields, updatedAt: new Date() });
+    setRecipes((prev) => prev.map((r) => (r.id === updated.id ? { ...updated, saves: r.saves } : r)));
   };
 
   const deleteRecipe = async (id: string) => {
